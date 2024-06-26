@@ -8,16 +8,4 @@ router.patch("/delete-me", userController.deleteMe);
 router.patch("update-password", userController.updateMyPassword);
 router.patch("update-profile-photo", userController.updateProfilePhoto);
 
-router
-  .route("/")
-  .post(userController.createUser)
-  .get(userController.getAllUsers)
-  .delete(userController.deleteManyUsers);
-
-router
-  .route("/:id")
-  .delete(userController.deleteUser)
-  .get(userController.getUser)
-  .patch(userController.updateUser);
-
 export default router;

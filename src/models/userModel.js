@@ -3,7 +3,12 @@ import { promisify } from "node:util";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import AppError from "../utils/appError.js";
-import { createTimeStampInEpoch } from "../utils/utils.js";
+import {
+  createHash,
+  createRandomBytes,
+  createTimeStampInEpoch,
+  generateOtp,
+} from "../utils/utils.js";
 import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
 
 const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
@@ -98,9 +103,22 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    isUserConfirmed: Boolean,
-    applyForDealership: Boolean,
+    otp: {
+      type: String,
+      select: false,
+    },
+    otpExpires: {
+      type: String,
+      select: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
     profilePhoto: String,
+    isUserConfirmed: Boolean,
+    isApplyForDealership: Boolean,
   },
   { timestamps: true },
 );
@@ -120,6 +138,11 @@ userSchema.pre("save", function (next) {
   next();
 });
 
+userSchema.pre(/^find/, function (next) {
+  this.find({ isActive: { $ne: false } });
+  next();
+});
+
 userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   if (this.passwordChangedAt) {
     return this.passwordChangedAt.getTime() / 1000 > jwtIsa;
@@ -134,27 +157,26 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
-/**
- *  @memberOf User#
- */
+userSchema.methods.generateAndSaveOtp = async function () {
+  const otp = generateOtp(6);
+  this.otp = createHash(otp);
+  this.otpExpires = createTimeStampInEpoch({ m: 10 });
+  await this.save({ validateBeforeSave: false });
+  return otp;
+};
+
 userSchema.methods.generateAndSavePasswordResetToken = async function () {
-  const token = (await promisify(crypto.randomBytes)(32)).toString("hex");
-  this.passwordResetToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-  this.passwordResetTokenExpires = createTimeStampInEpoch({ min: 10 });
+  const token = await createRandomBytes(32);
+  this.passwordResetToken = createHash(token);
+  this.passwordResetTokenExpires = createTimeStampInEpoch({ m: 10 });
   await this.save({ validateBeforeSave: false });
   return token;
 };
 
 userSchema.methods.generateAndSaveUserConfirmationToken = async function () {
-  const token = (await promisify(crypto.randomBytes)(32)).toString("hex");
-  this.userConfirmationToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-  this.userConfirmationTokenExpires = createTimeStampInEpoch({ min: 10 });
+  const token = await createRandomBytes(32);
+  this.userConfirmationToken = createHash(token);
+  this.userConfirmationTokenExpires = createTimeStampInEpoch({ m: 10 });
   await this.save({ validateBeforeSave: false });
   return token;
 };
@@ -175,7 +197,6 @@ userSchema.methods.revokeDealershipApplication = async function () {
   await this.save({ validateBeforeSave: false });
 };
 
-/** @class User */
 const User = mongoose.model("User", userSchema);
 
 export default User;

@@ -1,7 +1,13 @@
-import crypto from "node:crypto";
 import AppError from "../utils/appError.js";
-import { catchAsync, filterObject, sendToken } from "../utils/utils.js";
+import {
+  baseUrl,
+  catchAsync,
+  createHash,
+  filterObject,
+  isProduction,
+} from "../utils/utils.js";
 import { verify } from "../utils/jwt.js";
+import generateAndSendJwtCookie from "../utils/generateAndSendJwtCookie.js";
 import User from "../models/userModel.js";
 
 export const signUp = catchAsync(async (req, res, next) => {
@@ -15,10 +21,20 @@ export const signUp = catchAsync(async (req, res, next) => {
 
   const user = await User.create(userData);
   const token = await user.generateAndSaveUserConfirmationToken();
-  user.password = undefined;
-  user.userConfirmationToken = undefined;
-  user.userConfirmationTokenExpires = undefined;
-  await sendToken(user, res); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
+  const url = `${baseUrl(req)}/confirm-user/${token}`;
+
+  //THIS IS TO ALLOW EASY USER CONFIRMATION IN DEVELOPMENET
+  if (!isProduction) {
+    user.url = url;
+  }
+
+  console.log(url);
+
+  await generateAndSendJwtCookie(
+    user,
+    res,
+    "Confirmation token is sent to your email",
+  ); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const requestConfirmationToken = catchAsync(async (req, res, next) => {
@@ -30,19 +46,26 @@ export const requestConfirmationToken = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).exec();
 
+  if (!user) {
+    return next(new AppError("No user found with this email", 404));
+  }
+
   if (user.isUserConfirmed) {
     return next(new AppError("User is already confirmed", 409));
   }
 
   const token = await user.generateAndSaveUserConfirmationToken();
-  await sendToken(user, res); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
+  await generateAndSendJwtCookie(user, res); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const confirmUser = catchAsync(async (req, res, next) => {
-  const hashedToken = crypto
-    .createHash("sha")
-    .update(req.params.token)
-    .digest("hex");
+  const token = req.params;
+
+  if (!token) {
+    return next(new AppError("Token is required", 401));
+  }
+
+  const hashedToken = createHash(req.params.token);
 
   const user = await User.findOne({
     userConfirmationToken: hashedToken,
@@ -53,13 +76,14 @@ export const confirmUser = catchAsync(async (req, res, next) => {
     return next(new AppError("Token is incorrect or expired", 401));
   }
 
-  user.userConfirmationTokenExpires = undefined;
+  user.isUserConfirmed = true;
   user.userConfirmationToken = undefined;
+  user.userConfirmationTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
-  await sendToken(user, res);
+  await generateAndSendJwtCookie(user, res);
 });
 
-export const signIn = catchAsync(async (req, res, next) => {
+export const sendOtp = catchAsync(async (req, res, next) => {
   const { password, email } = req.body;
 
   if (!password || !email) {
@@ -68,13 +92,41 @@ export const signIn = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select("+password").exec();
 
-  if (!user && !(await user.comparePassword(password, user.password))) {
+  if (!user || !(await user.comparePassword(password, user.password))) {
     return next(new AppError("Password or email is incorrect", 401));
   }
 
-  user.password = undefined;
+  const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
 
-  await sendToken(user, res);
+  res.status(200).send({
+    statusText: "success",
+    message: "OTP is sent to your email",
+    otp: isProduction ? undefined : otp,
+  });
+});
+
+export const signIn = catchAsync(async (req, res, next) => {
+  const { otp } = req.body;
+
+  if (!otp) {
+    return next(new AppError("Otp is required", 401));
+  }
+
+  const hashedOtp = createHash(otp);
+
+  const user = await User.findOne({
+    otp: hashedOtp,
+    otpExpires: { $gt: Date.now() },
+  }).exec();
+
+  if (!user) {
+    return next(new AppError("OTP is incorrect or expired", 401));
+  }
+
+  user.otpExpires = undefined;
+  user.otp = undefined;
+  user.save({ validateBeforeSave: false });
+  await generateAndSendJwtCookie(user, res);
 });
 
 export const forgotPassword = catchAsync(async (req, res, next) => {
