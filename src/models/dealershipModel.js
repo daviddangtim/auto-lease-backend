@@ -25,3 +25,7 @@ const dealershipSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+const Dealership = mongoose.model("Dealership", dealershipSchema)
+
+export default Dealership;
