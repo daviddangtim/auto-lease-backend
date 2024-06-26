@@ -44,4 +44,7 @@ export const updateMe = catchAsync(async (req, res, next) => {
     await user.save();
 });
 
-export const deleteMe = catchAsync(async (req, res, next) => { });
+export const deleteMe = catchAsync(async (req, res, next) => { 
+
+    
+});
