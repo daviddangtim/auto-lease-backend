@@ -40,8 +40,14 @@ export const updateMe = catchAsync(async (req, res, next) => {
         return res.status(404).json({ message: "Unable to update fields because they were not found" })
     }
 
-    res.status(200).json({ message: "Details Updated Successfully" })
     await user.save();
+    res.status(200).json({ message: "Details Updated Successfully" })
 });
 
-export const deleteMe = catchAsync(async (req, res, next) => { });
+export const deleteMe = catchAsync(async (req, res, next) => { 
+ const user = findByIdAndDelete(req.user._id);
+
+ await user.save()
+
+ res.status(200).json({message:"User deleted "})
+});
