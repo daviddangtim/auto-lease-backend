@@ -3,6 +3,11 @@ import slugify from "slugify";
 
 const carSchema = new mongoose.Schema(
   {
+      dealership :{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Dealership",
+          required: [true, "A car must have a dealership"],
+      },
     name: {
       type: String,
       trim: true,
@@ -59,6 +64,10 @@ const carSchema = new mongoose.Schema(
       required: [true, "A car must have at least a photo"],
       // TODO: confirm the maximum amount of photos each cars can have
     },
+      photosId:{
+        type: [String],
+        required:[true,"A car photo must have an id"]
+      },
     price: {
       type: Number,
       required: [true, "A car must have a price"],

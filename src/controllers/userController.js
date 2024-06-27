@@ -66,6 +66,7 @@ export const deleteMe = catchAsync(async (req, res, next) => {
 	if (!user){
 		return next(new AppError("User Not found", 404))
 	}
+	await cloudinary.uploader.destroy(user.profilePhotoId)
 	await user.save();
 	res.status(200).json({ message: "User deleted " });
 });
