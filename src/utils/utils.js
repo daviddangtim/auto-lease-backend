@@ -21,6 +21,7 @@ export const filterObject = (object, ...keys) =>
     }
     return acc;
   }, {});
+
 export const generateOtp = (len) => {
   let otp = "";
   for (let i = 0; i < len; i++) {

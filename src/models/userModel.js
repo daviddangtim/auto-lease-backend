@@ -1,5 +1,3 @@
-import crypto from "node:crypto";
-import { promisify } from "node:util";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import AppError from "../utils/appError.js";
@@ -9,10 +7,11 @@ import {
   createTimeStampInEpoch,
   generateOtp,
 } from "../utils/utils.js";
+
 import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
 
 const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
-const { USER, DEALER, ADMIN } = ROLES;
+const { USER, DEALER, ADMIN, Driver } = ROLES;
 
 const userSchema = new mongoose.Schema(
   {
@@ -37,8 +36,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: USER,
       enum: {
-        values: [USER, DEALER, ADMIN],
-        message: `Invalid role. Choose from: ${USER},${DEALER}, ${ADMIN}`,
+        values: [USER, DEALER, DEALER, ADMIN],
+        message: `Invalid role. Choose from: ${USER},${DEALER}, ${Driver}, ${ADMIN}`,
       },
     },
     dealershipApplicationStatus: {
@@ -150,15 +149,17 @@ userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   return false;
 };
 
-userSchema.methods.comparePassword = async (
+userSchema.methods.comparePassword = async function (
   plainPassword,
   hashedPassword,
-) => await bcrypt.compare(plainPassword, hashedPassword);
+) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+};
 
 userSchema.methods.generateAndSaveOtp = async function () {
   const otp = generateOtp(6);
   this.otp = createHash(otp);
-  this.otpExpires = createTimeStampInEpoch({ m: 10 });
+  this.otpExpires = createTimeStampInEpoch({ m: 2 });
   await this.save({ validateBeforeSave: false });
   return otp;
 };
