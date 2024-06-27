@@ -1,6 +1,8 @@
 import { catchAsync } from "../utils/utils.js";
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
+import {cloudinary} from "../utils/imageUploader.js";
+import {defaultProfilePic} from "../utils/constants.js";
 
 export const updateMyPassword = catchAsync(async (req, res, next) => {
 	const { currentPassword, password, passwordConfirm } = req.body;
@@ -19,28 +21,26 @@ export const updateMyPassword = catchAsync(async (req, res, next) => {
 		.json({ message: "Password Updated Successfully", data: { user } });
 });
 
-export const updateMyPasswordV1 = catchAsync(async (req, res, next) => {
-	// GET THE CURRENT USER FROM THE REQUEST OBJECT PASSED BY PROTECT
-	const { user } = req;
-	const { currentPassword, password, passwordConfirm } = req.body;
 
-	// COMPARE THE PASSWORDS
-	if (!(await user.comparePassword(currentPassword, user.password))) {
-		return next(new AppError("Current password is incorrect", 401));
+export const updateProfilePhoto = catchAsync(async (req, res, next) => {
+	const image = req.file.path;
+	const {user} = req
+
+	await cloudinary.uploader.destroy(user.profilePhotoId)
+	await cloudinary.uploader.upload(image)
+
+	if (!image){
+		user.profilePhoto = defaultProfilePic;
+		user.profilePhotoId = null;
 	}
 
-	// UPDATE THE PASSWORD
-	user.password = password;
-	user.passwordConfirm = passwordConfirm;
-	await user.save(); // IF VALIDATION FAILS OUR GLOBAL HANDLING MIDDLEWARE WILL TAKE OVER
+	user.profilePhoto = image.secure_url;
+	user.profilePhotoId = image.public_id;
 
-	res.status(200).json({
-		statusText: "success",
-		data: { user },
-	});
+	await user.save();
+	res.status(200).json({status:"Successful", data:user.profilePhoto})
+
 });
-
-export const updateProfilePhoto = catchAsync(async (req, res, next) => {});
 
 export const updateMe = catchAsync(async (req, res, next) => {
 	const updates = {};
@@ -48,16 +48,13 @@ export const updateMe = catchAsync(async (req, res, next) => {
 	if (req.body.name) {
 		updates.name = req.body.name;
 	}
-
 	if (req.body.email) {
 		updates.email = req.body.email;
 	}
 
 	const user = findByIdAndUpdate(req.user._id, { $set: { updates } });
 	if (user.nModified === 0) {
-		return res
-			.status(404)
-			.json({ message: "Unable to update fields because they were not found" });
+		return next(new AppError("Unable to update fields", 400))
 	}
 
 	await user.save();
@@ -66,8 +63,9 @@ export const updateMe = catchAsync(async (req, res, next) => {
 
 export const deleteMe = catchAsync(async (req, res, next) => {
 	const user = findByIdAndDelete(req.user._id);
-
+	if (!user){
+		return next(new AppError("User Not found", 404))
+	}
 	await user.save();
-
 	res.status(200).json({ message: "User deleted " });
 });

@@ -8,7 +8,7 @@ import {
   generateOtp,
 } from "../utils/utils.js";
 
-import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
+import {DEALERSHIP_APPLICATION_STATUS, defaultProfilePic, ROLES} from "../utils/constants.js";
 
 const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
 const { USER, DEALER, ADMIN, Driver } = ROLES;
@@ -115,7 +115,12 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
-    profilePhoto: String,
+    profilePhoto: {
+        type:String,
+        default:defaultProfilePic,
+        required:false
+    },
+    profilePhotoId:String,
     isUserConfirmed: Boolean,
     isApplyForDealership: Boolean,
   },
