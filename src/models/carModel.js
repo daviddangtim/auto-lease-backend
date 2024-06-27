@@ -31,9 +31,7 @@ const carSchema = new mongoose.Schema(
       type: String,
       trim: true,
       validate: {
-        validator: function (v) {
-          return /^\d{15}$/.test(v);
-        },
+        validator: (v) => /^\d{15}$/.test(v),
         message: (props) => `${props.value} is not a valid IMEI!`,
       },
     },
