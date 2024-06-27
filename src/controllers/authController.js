@@ -28,6 +28,7 @@ export const signUp = catchAsync(async (req, res, next) => {
     user,
     res,
     `${isProduction ? "Confirmation token is sent to your email" : token}`,
+    201,
   ); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
@@ -143,7 +144,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   }
   const token = await user.generateAndSavePasswordResetToken();
 });
-export const resetPassword = catchAsync(async (req, res, next) => { });
+export const resetPassword = catchAsync(async (req, res, next) => {});
 
 export const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req;
@@ -179,22 +180,22 @@ export const protect = catchAsync(async (req, res, next) => {
 
 export const restrictTo =
   (...roles) =>
-    (req, res, next) => {
-      const user = req.user;
+  (req, res, next) => {
+    const user = req.user;
 
-      if (!user.isUserConfirmed) {
-        return next(
-          new AppError(
-            "Your account needs to be confirmed to access this resource",
-            403,
-          ),
-        );
-      }
+    if (!user.isUserConfirmed) {
+      return next(
+        new AppError(
+          "Your account needs to be confirmed to access this resource",
+          403,
+        ),
+      );
+    }
 
-      if (!roles.includes(user.role)) {
-        return next(
-          new AppError("You are not authorized to access this resource", 403),
-        );
-      }
-      return next();
-    };
+    if (!roles.includes(user.role)) {
+      return next(
+        new AppError("You are not authorized to access this resource", 403),
+      );
+    }
+    return next();
+  };
