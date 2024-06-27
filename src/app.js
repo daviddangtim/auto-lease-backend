@@ -4,17 +4,17 @@ import bodyParser from "express";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
+import mongoSanitize from "express-mongo-sanitize";
 
 // PROJECT IMPORTS
 import AppError from "./utils/appError.js";
 import globalError from "./controllers/errorController.js";
-import userRoute from "./routes/userRoute.js";
-import authRoute from "./routes/authRoute.js";
-import dealershipRoute from "./routes/dealershipRoute.js";
-import adminRoute from "./routes/adminRoute.js";
-import carRoute from "./routes/carRoute.js";
+import userRouter from "./routes/userRouter.js";
+import authRouter from "./routes/authRouter.js";
+import dealershipRouter from "./routes/dealershipRouter.js";
+import adminRouter from "./routes/adminRouter.js";
+import carRouter from "./routes/carRouter.js";
 
 const app = express();
 
@@ -31,11 +31,11 @@ app.use(mongoSanitize());
 app.use(xss());
 app.use(morgan("dev"));
 
-app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/user", userRoute);
-app.use("/api/v1/admin", adminRoute);
-app.use("/api/v1/dealership", dealershipRoute);
-app.use("/api/v1/car", carRoute);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/dealership", dealershipRouter);
+app.use("/api/v1/car", carRouter);
 
 app.all("*", (req, res, next) => {
   return next(new AppError(`${req.originalUrl} is not on this server`, 404));
