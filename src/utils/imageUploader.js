@@ -21,7 +21,7 @@ const storage= multer.diskStorage({
 
 })
 const fileFilter =  (req,file,cb)=> {
-    if (filetype === "image/png" || filetype === "image/jpg" || filetype === "image/jpeg") {
+    if (filetype === "image/png" || filetype === "image/jpg" || filetype === "image/jpeg" || filetype === "application/pdf") {
         cb(null, true)
     } else {
         cb(new AppError("File type not allowed", 400), false)
