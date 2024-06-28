@@ -1,4 +1,4 @@
-// LIB IMPORTS
+// LIB IMPORT
 import express from "express";
 import bodyParser from "express";
 import morgan from "morgan";
@@ -15,6 +15,7 @@ import authRouter from "./routes/authRouter.js";
 import dealershipRouter from "./routes/dealershipRouter.js";
 import adminRouter from "./routes/adminRouter.js";
 import carRouter from "./routes/carRouter.js";
+import reviewRouter from "./routes/reviewRouter.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/dealership", dealershipRouter);
 app.use("/api/v1/car", carRouter);
+app.use("/api/v1/review", reviewRouter);
 
 app.all("*", (req, res, next) => {
   return next(new AppError(`${req.originalUrl} is not on this server`, 404));

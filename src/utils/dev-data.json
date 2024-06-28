@@ -1,0 +1,258 @@
+[
+  {
+    "name": "Prestige Motors",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.2,
+    "ratingsQuantity": 750,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8761, 8.8854],
+      "address": "1st Floor Silver Plaza, Main Street, Jos, Plateau State, Nigeria.",
+      "description": "Main Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "Prestige Motors offers reliable car rental and sales services in Jos, Nigeria.",
+    "description": "Prestige Motors is a reputable automotive dealership in Jos, Plateau State, Nigeria. We offer a wide range of vehicles for rent and sale, ensuring quality and customer satisfaction. Visit us for a seamless and exceptional car rental experience."
+  },
+  {
+    "name": "Luxury Auto",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.8,
+    "ratingsQuantity": 1200,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8750, 8.8847],
+      "address": "3rd Floor Kings Tower, Market Road, Jos, Plateau State, Nigeria.",
+      "description": "Market Road"
+    },
+    "coverImage": "placeholder",
+    "summary": "Luxury Auto provides premium car rental services in Jos, Nigeria.",
+    "description": "Luxury Auto is your go-to dealership for premium car rental and sales services in Jos, Plateau State, Nigeria. Our fleet includes luxury vehicles to meet your high standards. Experience the best in automotive services with us."
+  },
+  {
+    "name": "DriveNow Rentals",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.6,
+    "ratingsQuantity": 850,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8735, 8.8835],
+      "address": "Ground Floor Zenith Plaza, High Street, Jos, Plateau State, Nigeria.",
+      "description": "High Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "DriveNow Rentals offers affordable car rental services in Jos, Nigeria.",
+    "description": "DriveNow Rentals is a trusted dealership in Jos, Plateau State, Nigeria, offering affordable and reliable car rental and sales services. We pride ourselves on our customer-focused approach. Come visit us for a pleasant car rental experience."
+  },
+  {
+    "name": "Elite Wheels",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 950,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8722, 8.8860],
+      "address": "2nd Floor City Mall, Independence Avenue, Jos, Plateau State, Nigeria.",
+      "description": "Independence Avenue"
+    },
+    "coverImage": "placeholder",
+    "summary": "Elite Wheels provides top-tier car rental services in Jos, Nigeria.",
+    "description": "Elite Wheels is a premier dealership located in Jos, Plateau State, Nigeria, specializing in top-tier car rental and sales services. We offer a variety of vehicles to suit your needs. Visit us for an outstanding automotive experience."
+  },
+  {
+    "name": "Comfort Rides",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.3,
+    "ratingsQuantity": 650,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8710, 8.8842],
+      "address": "1st Floor Unity Complex, Liberty Boulevard, Jos, Plateau State, Nigeria.",
+      "description": "Liberty Boulevard"
+    },
+    "coverImage": "placeholder",
+    "summary": "Comfort Rides offers convenient car rental services in Jos, Nigeria.",
+    "description": "Comfort Rides is a well-known dealership in Jos, Plateau State, Nigeria, providing convenient car rental and sales services. We focus on making the rental process smooth and hassle-free for our customers. Come to Comfort Rides for your car needs."
+  },
+  {
+    "name": "Reliable Motors",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.4,
+    "ratingsQuantity": 670,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8703, 8.8825],
+      "address": "Ground Floor Harmony Building, Peace Street, Jos, Plateau State, Nigeria.",
+      "description": "Peace Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "Reliable Motors offers dependable car rental services in Jos, Nigeria.",
+    "description": "Reliable Motors is a trusted dealership in Jos, Plateau State, Nigeria, providing dependable car rental and sales services. Our goal is to ensure customer satisfaction with our reliable and quality vehicles. Visit Reliable Motors for an excellent car rental experience."
+  },
+  {
+    "name": "Prime Rides",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.5,
+    "ratingsQuantity": 780,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8729, 8.8870],
+      "address": "2nd Floor Fortune Plaza, Victory Lane, Jos, Plateau State, Nigeria.",
+      "description": "Victory Lane"
+    },
+    "coverImage": "placeholder",
+    "summary": "Prime Rides provides exceptional car rental services in Jos, Nigeria.",
+    "description": "Prime Rides is a leading dealership in Jos, Plateau State, Nigeria, offering exceptional car rental and sales services. We have a wide range of vehicles to cater to various needs and preferences. Choose Prime Rides for a top-notch automotive experience."
+  },
+  {
+    "name": "Superb Auto",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.6,
+    "ratingsQuantity": 890,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8715, 8.8849],
+      "address": "3rd Floor Iconic Tower, Glory Road, Jos, Plateau State, Nigeria.",
+      "description": "Glory Road"
+    },
+    "coverImage": "placeholder",
+    "summary": "Superb Auto offers premium car rental services in Jos, Nigeria.",
+    "description": "Superb Auto is a renowned dealership in Jos, Plateau State, Nigeria, providing premium car rental and sales services. Our fleet includes high-quality vehicles to meet your needs. Experience the best in car rental services with Superb Auto."
+  },
+  {
+    "name": "Classic Cars",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 920,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8737, 8.8836],
+      "address": "1st Floor Modern Complex, Heritage Street, Jos, Plateau State, Nigeria.",
+      "description": "Heritage Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "Classic Cars provides excellent car rental services in Jos, Nigeria.",
+    "description": "Classic Cars is a distinguished dealership in Jos, Plateau State, Nigeria, offering excellent car rental and sales services. Our mission is to provide customers with high-quality vehicles and outstanding service. Visit Classic Cars for a superior car rental experience."
+  },
+  {
+    "name": "Dynamic Wheels",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.5,
+    "ratingsQuantity": 760,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8749, 8.8868],
+      "address": "2nd Floor Elite Tower, Legacy Avenue, Jos, Plateau State, Nigeria.",
+      "description": "Legacy Avenue"
+    },
+    "coverImage": "placeholder",
+    "summary": "Dynamic Wheels offers reliable car rental services in Jos, Nigeria.",
+    "description": "Dynamic Wheels is a reputable dealership in Jos, Plateau State, Nigeria, providing reliable car rental and sales services. Our fleet includes a variety of vehicles to meet different needs. Choose Dynamic Wheels for a dependable and convenient car rental experience."
+  },
+  {
+    "name": "Rapid Rentals",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.3,
+    "ratingsQuantity": 640,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8758, 8.8852],
+      "address": "Ground Floor Stellar Building, Freedom Street, Jos, Plateau State, Nigeria.",
+      "description": "Freedom Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "Rapid Rentals provides fast and efficient car rental services in Jos, Nigeria.",
+    "description": "Rapid Rentals is a well-known dealership in Jos, Plateau State, Nigeria, offering fast and efficient car rental and sales services. We focus on providing quick and reliable solutions for our customers' car rental needs. Visit Rapid Rentals for a swift and satisfactory experience."
+  },
+  {
+    "name": "Pro Auto",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.6,
+    "ratingsQuantity": 830,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8765, 8.8875],
+      "address": "3rd Floor Alpha Plaza, Pioneer Road, Jos, Plateau State, Nigeria.",
+      "description": "Pioneer Road"
+    },
+    "coverImage": "placeholder",
+    "summary": "Pro Auto provides professional car rental services in Jos, Nigeria.",
+    "description": "Pro Auto is a leading dealership in Jos, Plateau State, Nigeria, offering professional car rental and sales services. We take pride in our extensive fleet and customer-focused approach. Experience professionalism and quality with Pro Auto."
+  },
+  {
+    "name": "Optimum Rides",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.8,
+    "ratingsQuantity": 1100,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8728, 8.8840],
+      "address": "2nd Floor Omega Tower, Unity Avenue, Jos, Plateau State, Nigeria.",
+      "description": "Unity Avenue"
+    },
+    "coverImage": "placeholder",
+    "summary": "Optimum Rides offers exceptional car rental services in Jos, Nigeria.",
+    "description": "Optimum Rides is a premier dealership in Jos, Plateau State, Nigeria, providing exceptional car rental and sales services. Our wide range of vehicles and customer-oriented service make us a top choice. Visit Optimum Rides for an optimal car rental experience."
+  },
+  {
+    "name": "Choice Cars",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 980,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8734, 8.8862],
+      "address": "Ground Floor Prestige Complex, Victory Street, Jos, Plateau State, Nigeria.",
+      "description": "Victory Street"
+    },
+    "coverImage": "placeholder",
+    "summary": "Choice Cars provides top-quality car rental services in Jos, Nigeria.",
+    "description": "Choice Cars is a well-established dealership in Jos, Plateau State, Nigeria, offering top-quality car rental and sales services. We are committed to providing our customers with the best vehicles and service. Choose Choice Cars for a high-quality car rental experience."
+  },
+  {
+    "name": "Value Auto",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.4,
+    "ratingsQuantity": 720,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8742, 8.8850],
+      "address": "1st Floor Summit Plaza, Prosperity Road, Jos, Plateau State, Nigeria.",
+      "description": "Prosperity Road"
+    },
+    "coverImage": "placeholder",
+    "summary": "Value Auto offers affordable and quality car rental services in Jos, Nigeria.",
+    "description": "Value Auto is a trusted dealership in Jos, Plateau State, Nigeria, providing affordable and quality car rental and sales services. Our goal is to offer value for money to our customers. Visit Value Auto for a cost-effective and quality car rental experience."
+  },
+  {
+    "name": "City Rides",
+    "cacCertificate": "Certificate placeholder",
+    "dealershipLicence": "Licence placeholder",
+    "ratingsAverage": 4.5,
+    "ratingsQuantity": 760,
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [9.8756, 8.8878],
+      "address": "2nd Floor Empire Tower, Sunrise Boulevard, Jos, Plateau State, Nigeria.",
+      "description": "Sunrise Boulevard"
+    },
+    "coverImage": "placeholder",
+    "summary": "City Rides offers reliable car rental services in Jos, Nigeria.",
+    "description": "City Rides is a reputable dealership in Jos, Plateau State, Nigeria, providing reliable car rental and sales services. Our fleet includes a variety of vehicles to meet different needs. Choose City Rides for a dependable and convenient car rental experience."
+  }
+]
