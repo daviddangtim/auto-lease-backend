@@ -11,8 +11,10 @@ import {
   isProduction,
 } from "../utils/utils.js";
 
+// TODO: REMOVE ALL CODES THAT SHOULD BE RUN ONLY ON DEV WHEN YOU ARE DONE WITH THE PROJECT
+
 export const signUp = catchAsync(async (req, res, next) => {
-  const userData = filterObject(
+  const payload = filterObject(
     req.body,
     "name",
     "email",
@@ -20,27 +22,30 @@ export const signUp = catchAsync(async (req, res, next) => {
     "passwordConfirm",
   );
 
-  const user = await User.create(userData);
+  const user = await User.create(payload);
   const token = await user.generateAndSaveUserConfirmationToken();
   const url = `${baseUrl(req)}/confirm-user/${token}`;
 
   await generateAndSendJwtCookie(
     user,
     res,
-    `${isProduction ? "Confirmation token is sent to your email" : token}`,
+    -`${isProduction ? "Confirmation token is sent to your email" : token}`,
     201,
   ); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const requestConfirmationToken = catchAsync(async (req, res, next) => {
   let { user } = req;
+  let token;
 
   if (user) {
-    // TODO: SEND TOKEN TO EMAIL
-    return;
+    if (user.isUserConfirmed) {
+      return next(new AppError("User is already confirmed", 409));
+    }
+    token = await user.generateAndSaveUserConfirmationToken();
   } else {
+    // If a user is not logged in but want to be verified this will  handle that
     const { email, password } = req.body;
-
     if (!email || !password) {
       return next(new AppError("Email and password are required", 400));
     }
@@ -55,14 +60,14 @@ export const requestConfirmationToken = catchAsync(async (req, res, next) => {
       return next(new AppError("User is already confirmed", 409));
     }
 
-    const token = await user.generateAndSaveUserConfirmationToken();
-    const url = `${baseUrl(req)}/confirm-user/${token}`;
-
-    res.status(200).json({
-      statusText: "success",
-      message: `${isProduction ? "Confirmation token is sent to your email" : token}`,
-    }); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
+    token = await user.generateAndSaveUserConfirmationToken();
   }
+
+  const url = `${baseUrl(req)}/confirm-user/${token}`;
+  res.status(200).json({
+    statusText: "success",
+    message: `${isProduction ? "Confirmation token is sent to your email" : token}`,
+  }); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const confirmUser = catchAsync(async (req, res, next) => {
@@ -87,7 +92,6 @@ export const confirmUser = catchAsync(async (req, res, next) => {
   user.userConfirmationToken = undefined;
   user.userConfirmationTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
-  await generateAndSendJwtCookie(user, res);
 });
 
 export const sendOtp = catchAsync(async (req, res, next) => {
