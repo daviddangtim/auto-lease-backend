@@ -8,7 +8,8 @@ import {
   generateOtp,
 } from "../utils/utils.js";
 
-import {DEALERSHIP_APPLICATION_STATUS, defaultProfilePic, ROLES} from "../utils/constants.js";
+import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
+import pointSchema from "./pointSchema.js";
 
 const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
 const { USER, DEALER, ADMIN, Driver } = ROLES;
@@ -115,12 +116,9 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
-    profilePhoto: {
-        type:String,
-        default:defaultProfilePic,
-        required:false
-    },
-    profilePhotoId:String,
+    profilePhoto: String,
+    driversLicense: String,
+    location: pointSchema,
     isUserConfirmed: Boolean,
     isApplyForDealership: Boolean,
   },
