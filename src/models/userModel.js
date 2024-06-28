@@ -149,12 +149,10 @@ userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   return false;
 };
 
-userSchema.methods.comparePassword = async function (
+userSchema.methods.comparePassword = async (
   plainPassword,
   hashedPassword,
-) {
-  return await bcrypt.compare(plainPassword, hashedPassword);
-};
+) => await bcrypt.compare(plainPassword, hashedPassword);
 
 userSchema.methods.generateAndSaveOtp = async function () {
   const otp = generateOtp(6);
