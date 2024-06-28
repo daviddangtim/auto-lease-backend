@@ -5,6 +5,11 @@ import pointSchema from "./pointSchema.js";
 
 const carSchema = new mongoose.Schema(
   {
+      dealership :{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Dealership",
+          required: [true, "A car must have a dealership"],
+      },
     name: {
       type: String,
       trim: true,
@@ -71,6 +76,10 @@ const carSchema = new mongoose.Schema(
         "Photos array must contain between 1 and 10 items",
       ],
     },
+      photosId:{
+        type: [String],
+        required:[true,"A car photo must have an id"]
+      },
     price: {
       type: Number,
       required: [true, "A car must have a price"],
