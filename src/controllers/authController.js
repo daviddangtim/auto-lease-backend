@@ -1,8 +1,10 @@
+// TODO: REMOVE ALL CODES THAT SHOULD BE RUN ONLY ON DEV WHEN YOU ARE DONE WITH THE PROJECT
 import AppError from "../utils/appError.js";
-import { verify } from "../utils/jwt.js";
+import Email from "../utils/email.js";
+import { verify as jwtVerify } from "../utils/jwt.js";
 import generateAndSendJwtCookie from "../utils/generateAndSendJwtCookie.js";
+import sendConfirmationToken from "../utils/sendConfirmationToken.js";
 import User from "../models/userModel.js";
-
 import {
   baseUrl,
   catchAsync,
@@ -12,57 +14,35 @@ import {
 } from "../utils/utils.js";
 
 export const signUp = catchAsync(async (req, res, next) => {
-  const userData = filterObject(
-    req.body,
+  const payload = filterObject(req.body, [
     "name",
     "email",
     "password",
     "passwordConfirm",
-  );
+  ]);
 
-  const user = await User.create(userData);
-  const token = await user.generateAndSaveUserConfirmationToken();
-  const url = `${baseUrl(req)}/confirm-user/${token}`;
-
-  await generateAndSendJwtCookie(
-    user,
-    res,
-    `${isProduction ? "Confirmation token is sent to your email" : token}`,
-    201,
-  ); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
+  const user = await User.create(payload);
+  await sendConfirmationToken(req, res, next, user, 201);
 });
 
 export const requestConfirmationToken = catchAsync(async (req, res, next) => {
-  let { user } = req;
+  const { email } = req.body;
 
-  if (user) {
-    // TODO: SEND TOKEN TO EMAIL
-    return;
-  } else {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return next(new AppError("Email and password are required", 400));
-    }
-
-    user = await User.findOne({ email }).select("+password").exec();
-
-    if (!user || !(await user.comparePassword(password, user.password))) {
-      return next(new AppError("Incorrect email or password", 401));
-    }
-
-    if (user.isUserConfirmed) {
-      return next(new AppError("User is already confirmed", 409));
-    }
-
-    const token = await user.generateAndSaveUserConfirmationToken();
-    const url = `${baseUrl(req)}/confirm-user/${token}`;
-
-    res.status(200).json({
-      statusText: "success",
-      message: `${isProduction ? "Confirmation token is sent to your email" : token}`,
-    }); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
+  if (!email) {
+    return next(new AppError("Email is required", 400));
   }
+
+  const user = await User.findOne({ email }).exec();
+
+  if (!user) {
+    return next(new AppError("No user found with this email.", 404));
+  }
+
+  if (user.isUserConfirmed) {
+    return next(new AppError("User is already confirmed", 409));
+  }
+
+  await sendConfirmationToken(req, res, next, user);
 });
 
 export const confirmUser = catchAsync(async (req, res, next) => {
@@ -83,14 +63,11 @@ export const confirmUser = catchAsync(async (req, res, next) => {
     return next(new AppError("Token is incorrect or expired", 401));
   }
 
-  user.isUserConfirmed = true;
-  user.userConfirmationToken = undefined;
-  user.userConfirmationTokenExpires = undefined;
-  await user.save({ validateBeforeSave: false });
+  await user.confirmUser();
   await generateAndSendJwtCookie(user, res);
 });
 
-export const sendOtp = catchAsync(async (req, res, next) => {
+export const signIn = catchAsync(async (req, res, next) => {
   const { password, email } = req.body;
 
   if (!password || !email) {
@@ -103,24 +80,32 @@ export const sendOtp = catchAsync(async (req, res, next) => {
     return next(new AppError("Incorrect password or email", 401));
   }
 
-  const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
+  if (!user.isUserConfirmed && isProduction) {
+    await sendConfirmationToken(req, res, next, user, 401);
+  }
 
-  res.status(200).send({
-    statusText: "success",
-    message: "OTP is sent to your email",
-    otp: isProduction ? undefined : otp,
-  });
+  try {
+    const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
+    res.status(200).send({
+      statusText: "success",
+      message: "OTP is sent to your email",
+      otp: isProduction ? undefined : otp,
+    });
+  } catch (err) {
+    await user.destroyOtp();
+  }
 });
 
-export const signIn = catchAsync(async (req, res, next) => {
+export const verify = catchAsync(async (req, res, next) => {
   const { otp } = req.body;
 
   if (!otp) {
-    return next(new AppError("Otp is required", 400));
+    return next(
+      new AppError("OTP is required to verify it's you loggin in", 400),
+    );
   }
 
   const hashedOtp = createHash(otp);
-
   const user = await User.findOne({
     otp: hashedOtp,
     otpExpires: { $gt: Date.now() },
@@ -130,20 +115,38 @@ export const signIn = catchAsync(async (req, res, next) => {
     return next(new AppError("OTP is incorrect or expired", 401));
   }
 
-  user.otpExpires = undefined;
-  user.otp = undefined;
-  user.save({ validateBeforeSave: false });
+  // await user.destroyOtp();
   await generateAndSendJwtCookie(user, res);
 });
 
 export const forgotPassword = catchAsync(async (req, res, next) => {
-  const user = await User.findOne({ email: req.body.email }).exec();
+  const { email } = req.body;
+
+  if (!email) {
+    return next(new AppError("Email is required", 400));
+  }
+
+  const user = await User.findOne({ email }).exec();
 
   if (!user) {
     return next(new AppError("User with this email does not exits", 404));
   }
+
   const token = await user.generateAndSavePasswordResetToken();
+  const url = `${baseUrl(req)}/auth/reset-password/${token}`;
+
+  try {
+    await new Email(user, url).sendPasswordReset();
+    res.status(200).send({
+      statusText: "success",
+      message: `Please check the email address ${email} for instructions to reset your password`,
+    });
+  } catch (err) {
+    await user.destroyPasswordResetToken();
+    return next(new AppError("There was an error sending the email", 500));
+  }
 });
+
 export const resetPassword = catchAsync(async (req, res, next) => {});
 
 export const protect = catchAsync(async (req, res, next) => {
@@ -160,7 +163,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  const decoded = await verify(token);
+  const decoded = await jwtVerify(token);
   const user = await User.findById(decoded.id).exec();
 
   if (!user) {
