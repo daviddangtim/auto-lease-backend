@@ -54,7 +54,7 @@ export default class Email {
   }
 
   async sendWelcome() {
-    await this.send("confirmEmail", "Welcome to Your Email");
+    await this.send("sendWelcome", "Welcome to Your Email");
   }
 
   async sendPasswordReset() {
