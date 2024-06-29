@@ -1,16 +1,12 @@
 // LIB IMPORT
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 import express from "express";
 import bodyParser from "express";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import xss from "xss-clean";
-import mongoSanitize from "express-mongo-sanitize";
 
+import mongoSanitize from "express-mongo-sanitize";
 // PROJECT IMPORTS
 import AppError from "./utils/appError.js";
 import globalError from "./controllers/errorController.js";
