@@ -108,9 +108,8 @@ export const verify = catchAsync(async (req, res, next) => {
     );
   }
 
-  const hashedOtp = createHash(otp);
   const user = await User.findOne({
-    otp: hashedOtp,
+    otp: createHash(otp),
     otpExpires: { $gt: Date.now() },
   }).exec();
 
