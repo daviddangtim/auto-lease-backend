@@ -64,6 +64,7 @@ export const confirmUser = catchAsync(async (req, res, next) => {
   }
 
   await user.confirmUser();
+  await new Email(user, `${baseUrl(req)}/api/v1/user/me`).sendWelcome();
   await generateAndSendJwtCookie(user, res);
 });
 
@@ -86,6 +87,8 @@ export const signIn = catchAsync(async (req, res, next) => {
 
   try {
     const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
+    await new Email(user, otp).sendOtp();
+
     res.status(200).send({
       statusText: "success",
       message: "OTP is sent to your email",
@@ -115,7 +118,7 @@ export const verify = catchAsync(async (req, res, next) => {
     return next(new AppError("OTP is incorrect or expired", 401));
   }
 
-  // await user.destroyOtp();
+  await user.destroyOtp();
   await generateAndSendJwtCookie(user, res);
 });
 
@@ -147,7 +150,47 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-export const resetPassword = catchAsync(async (req, res, next) => {});
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+
+  if (!token) {
+    return next(new AppError("Token is required", 400));
+  }
+
+  const { password, passwordConfirm } = req.body;
+
+  if (!password || !passwordConfirm) {
+    return next(
+      new AppError("Password and password confirm are required", 401),
+    );
+  }
+
+  const user = await User.findOne({
+    passwordResetToken: createHash(token),
+    passwordResetTokenExpires: { $gt: Date.now() },
+  }).exec();
+
+  if (!user) {
+    return next(new AppError("Token is incorrect or expired", 401));
+  }
+
+  if (await user.comparePassword(password, user.password)) {
+    return next(
+      new AppError("new password cannot be same as old password.", 400),
+    );
+  }
+
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+
+  await user.save();
+  await user.destroyPasswordResetToken();
+
+  res.status(200).send({
+    statusText: "success",
+    message: "Password reset successful. Please log in with your new password.",
+  });
+});
 
 export const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req;
