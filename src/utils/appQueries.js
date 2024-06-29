@@ -7,6 +7,7 @@ export default class AppQueries {
   filter() {
     const cQueryObject = { ...this.queryObject };
     const excluded = ["page", "limit", "sort", "fields"];
+    // biome-ignore lint/complexity/noForEach: <explanation>
     excluded.forEach((el) => delete cQueryObject[el]);
 
     this.query = this.query.find(

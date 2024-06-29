@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
+import pointSchema from "./pointSchema.js";
 
-const dealershipSchema = new mongoose.Schema(
+export const dealershipSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -8,24 +10,98 @@ const dealershipSchema = new mongoose.Schema(
       trim: true,
       minlength: [4, "Dealership Name must be at least 4 characters long"],
       maxlength: [50, "Name cannot be more than 50 characters"],
-      validate: {
-        validator: (value) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(value),
-        message:
-          "Name must start with a letter and can only contain letters and numbers without spaces or special characters",
-      },
     },
-    numRatings: {
+    cacCertificate: {
+      type: String,
+      select: false,
+      required: [true, "A dealership must have a valid CAC certificate"],
+    },
+    dealershipLicence: {
+      type: String,
+      select: false,
+      required: [
+        true,
+        "A dealership must have a valid valid Dealership Licence",
+      ],
+    },
+    description: {
+      type: String,
+      trim: true,
+      required: [true, "Description is required"],
+      maxlength: [500, "Description cannot be more than 500 characters"],
+      minLength: [200, "Description cannot be less than 200 characters"],
+    },
+    summary: {
+      type: String,
+      trim: true,
+      required: [true, "Summary is required"],
+      maxlength: [150, "Summary cannot be more than 150 characters"],
+      minLength: [50, "Summary cannot be less than 50 characters"],
+    },
+    ratingsQuantity: {
       type: Number,
       default: 0,
-      min:[]
+      min: [0, "Ratings quantity cannot be less than 0"],
     },
     ratingsAverage: {
       type: Number,
-    }
+      default: 0,
+      min: [0, "Ratings Average cannot be less than 0"],
+      max: [5, "Ratings average cannot be more than 5"],
+    },
+    startLocation: {
+      type: pointSchema,
+      required: [true, "Start location is required"],
+      index: "2dsphere",
+    },
+    coverImage: {
+      type: String,
+      required: ["A Dealership must have a cover image"],
+    },
+    photos: [String],
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "A dealership must have a owner"],
+    },
+    cars: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Car",
+      },
+    ],
+    deliveryAgent: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
+    isApproved: {
+      type: Boolean,
+      select: false,
+    },
+    isRejected: {
+      type: Boolean,
+      select: false,
+    },
+    locations: [pointSchema],
+    slug: String,
   },
   { timestamps: true },
 );
 
-const Dealership = mongoose.model("Dealership", dealershipSchema)
+dealershipSchema.pre("save", function (next) {
+  if (!this.isModified("slug")) {
+    this.slug = slugify(this.name, { lower: true });
+  }
+  next();
+});
+
+dealershipSchema.pre(/^find/, function (next) {
+  this.populate("owner");
+  next();
+});
+
+const Dealership = mongoose.model("Dealership", dealershipSchema);
 
 export default Dealership;

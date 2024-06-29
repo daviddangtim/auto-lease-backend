@@ -1,4 +1,8 @@
 import AppError from "../utils/appError.js";
+import { verify } from "../utils/jwt.js";
+import generateAndSendJwtCookie from "../utils/generateAndSendJwtCookie.js";
+import User from "../models/userModel.js";
+
 import {
   baseUrl,
   catchAsync,
@@ -6,9 +10,6 @@ import {
   filterObject,
   isProduction,
 } from "../utils/utils.js";
-import { verify } from "../utils/jwt.js";
-import generateAndSendJwtCookie from "../utils/generateAndSendJwtCookie.js";
-import User from "../models/userModel.js";
 
 export const signUp = catchAsync(async (req, res, next) => {
   const userData = filterObject(
@@ -23,49 +24,55 @@ export const signUp = catchAsync(async (req, res, next) => {
   const token = await user.generateAndSaveUserConfirmationToken();
   const url = `${baseUrl(req)}/confirm-user/${token}`;
 
-  //THIS IS TO ALLOW EASY USER CONFIRMATION IN DEVELOPMENET
-  if (!isProduction) {
-    user.url = url;
-  }
-
-  console.log(url);
-
   await generateAndSendJwtCookie(
     user,
     res,
-    "Confirmation token is sent to your email",
+    `${isProduction ? "Confirmation token is sent to your email" : token}`,
+    201,
   ); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const requestConfirmationToken = catchAsync(async (req, res, next) => {
-  const { email } = req.body;
+  let { user } = req;
 
-  if (!email) {
-    return next(new AppError("Email is required", 400));
+  if (user) {
+    // TODO: SEND TOKEN TO EMAIL
+    return;
+  } else {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return next(new AppError("Email and password are required", 400));
+    }
+
+    user = await User.findOne({ email }).select("+password").exec();
+
+    if (!user || !(await user.comparePassword(password, user.password))) {
+      return next(new AppError("Incorrect email or password", 401));
+    }
+
+    if (user.isUserConfirmed) {
+      return next(new AppError("User is already confirmed", 409));
+    }
+
+    const token = await user.generateAndSaveUserConfirmationToken();
+    const url = `${baseUrl(req)}/confirm-user/${token}`;
+
+    res.status(200).json({
+      statusText: "success",
+      message: `${isProduction ? "Confirmation token is sent to your email" : token}`,
+    }); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
   }
-
-  const user = await User.findOne({ email }).exec();
-
-  if (!user) {
-    return next(new AppError("No user found with this email", 404));
-  }
-
-  if (user.isUserConfirmed) {
-    return next(new AppError("User is already confirmed", 409));
-  }
-
-  const token = await user.generateAndSaveUserConfirmationToken();
-  await generateAndSendJwtCookie(user, res); // TODO: IMPLEMENT EMAIL FUNCTIONALITY TO SEND THE CONFIRMATION TOKEN
 });
 
 export const confirmUser = catchAsync(async (req, res, next) => {
-  const token = req.params;
+  const { token } = req.params;
 
   if (!token) {
-    return next(new AppError("Token is required", 401));
+    return next(new AppError("Token is required", 400));
   }
 
-  const hashedToken = createHash(req.params.token);
+  const hashedToken = createHash(token);
 
   const user = await User.findOne({
     userConfirmationToken: hashedToken,
@@ -93,7 +100,7 @@ export const sendOtp = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password").exec();
 
   if (!user || !(await user.comparePassword(password, user.password))) {
-    return next(new AppError("Password or email is incorrect", 401));
+    return next(new AppError("Incorrect password or email", 401));
   }
 
   const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
@@ -109,7 +116,7 @@ export const signIn = catchAsync(async (req, res, next) => {
   const { otp } = req.body;
 
   if (!otp) {
-    return next(new AppError("Otp is required", 401));
+    return next(new AppError("Otp is required", 400));
   }
 
   const hashedOtp = createHash(otp);
@@ -137,7 +144,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   }
   const token = await user.generateAndSavePasswordResetToken();
 });
-export const resetPassword = catchAsync(async (req, res, next) => { });
+export const resetPassword = catchAsync(async (req, res, next) => {});
 
 export const protect = catchAsync(async (req, res, next) => {
   const { authorization } = req;
@@ -173,22 +180,22 @@ export const protect = catchAsync(async (req, res, next) => {
 
 export const restrictTo =
   (...roles) =>
-    (req, res, next) => {
-      const user = req.user;
+  (req, res, next) => {
+    const user = req.user;
 
-      if (!user.isUserConfirmed) {
-        return next(
-          new AppError(
-            "Your account needs to be confirmed to access this resource",
-            403,
-          ),
-        );
-      }
+    if (!user.isUserConfirmed) {
+      return next(
+        new AppError(
+          "Your account needs to be confirmed to access this resource",
+          403,
+        ),
+      );
+    }
 
-      if (!roles.includes(user.role)) {
-        return next(
-          new AppError("You are not authorized to access this resource", 403),
-        );
-      }
-      return next();
-    };
+    if (!roles.includes(user.role)) {
+      return next(
+        new AppError("You are not authorized to access this resource", 403),
+      );
+    }
+    return next();
+  };

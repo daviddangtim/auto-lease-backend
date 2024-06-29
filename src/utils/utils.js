@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { promisify } from "node:util";
+import AppError from "./appError.js";
 
 export const catchAsync = (cb) => (req, res, next) =>
   cb(req, res, next).catch(next);
@@ -14,13 +15,20 @@ export const createHash = (data) =>
 export const createRandomBytes = async (len) =>
   (await promisify(crypto.randomBytes)(len)).toString("hex");
 
-export const filterObject = (object, ...keys) =>
+export const filterObject = (object, keys, { exclude = false } = {}) =>
   Object.keys(object).reduce((acc, key) => {
-    if (keys.includes(key)) {
-      acc[key] = object[key];
+    if (exclude) {
+      if (!keys.includes(key)) {
+        acc[key] = object[key];
+      }
+    } else {
+      if (keys.includes(key)) {
+        acc[key] = object[key];
+      }
     }
     return acc;
   }, {});
+
 export const generateOtp = (len) => {
   let otp = "";
   for (let i = 0; i < len; i++) {
@@ -28,6 +36,14 @@ export const generateOtp = (len) => {
   }
   return otp;
 };
+
+export const limitArrayLength =
+  (max = 0, min = 0) =>
+  (value) => {
+    if (!Array.isArray(value)) return false;
+    const len = value.length;
+    return len >= min && len <= max;
+  };
 
 export const createTimeStampInEpoch = ({
   s = 0,
