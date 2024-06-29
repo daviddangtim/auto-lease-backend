@@ -104,7 +104,7 @@ export const verify = catchAsync(async (req, res, next) => {
 
   if (!otp) {
     return next(
-      new AppError("OTP is required to verify it's you loggin in", 400),
+      new AppError("OTP is required to verify it's you login in", 400),
     );
   }
 
