@@ -88,7 +88,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     passwordResetTokenExpires: {
-      type: String,
+      type: Date,
       select: false,
     },
     userConfirmationToken: {
@@ -104,11 +104,11 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     otp: {
-      type: String,
+      type: Date,
       select: false,
     },
     otpExpires: {
-      type: String,
+      type: Date,
       select: false,
     },
     isActive: {
@@ -152,10 +152,15 @@ userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   return false;
 };
 
-userSchema.methods.comparePassword = async (
-  plainPassword,
-  hashedPassword,
-) => await bcrypt.compare(plainPassword, hashedPassword);
+userSchema.methods.comparePassword = async (plainPassword, hashedPassword) =>
+  await bcrypt.compare(plainPassword, hashedPassword);
+
+userSchema.methods.confirmUser = async function () {
+  this.isUserConfirmed = true;
+  this.userConfirmationToken = undefined;
+  this.userConfirmationTokenExpires = undefined;
+  await this.save({ validateBeforeSave: false });
+};
 
 userSchema.methods.generateAndSaveOtp = async function () {
   const otp = generateOtp(6);
@@ -163,6 +168,12 @@ userSchema.methods.generateAndSaveOtp = async function () {
   this.otpExpires = createTimeStampInEpoch({ m: 2 });
   await this.save({ validateBeforeSave: false });
   return otp;
+};
+
+userSchema.methods.destroyOtp = async function () {
+  this.otp = undefined;
+  this.otpExpires = undefined;
+  await this.save({ validateBeforeSave: false });
 };
 
 userSchema.methods.generateAndSavePasswordResetToken = async function () {
@@ -173,12 +184,24 @@ userSchema.methods.generateAndSavePasswordResetToken = async function () {
   return token;
 };
 
+userSchema.methods.destroyPasswordResetToken = async function () {
+  this.passwordResetToken = undefined;
+  this.passwordResetTokenExpires = undefined;
+  await this.save({ validateBeforeSave: false });
+};
+
 userSchema.methods.generateAndSaveUserConfirmationToken = async function () {
   const token = await createRandomBytes(32);
   this.userConfirmationToken = createHash(token);
   this.userConfirmationTokenExpires = createTimeStampInEpoch({ m: 10 });
   await this.save({ validateBeforeSave: false });
   return token;
+};
+
+userSchema.methods.destroyConfirmationToken = async function () {
+  this.userConfirmationToken = undefined;
+  this.userConfirmationToken = undefined;
+  this.save({ validateBeforeSave: false });
 };
 
 userSchema.methods.dealershipApplicationResponse = async function (status) {
