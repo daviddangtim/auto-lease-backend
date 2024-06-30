@@ -4,7 +4,7 @@ import { createTimeStampInEpoch } from "./utils.js";
 const generateAndSendJwtCookie = async (
   user,
   res,
-  message,
+  message = undefined,
   statusCode = 200,
 ) => {
   const token = await sign(user._id);

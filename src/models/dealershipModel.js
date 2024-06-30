@@ -84,6 +84,10 @@ export const dealershipSchema = new mongoose.Schema(
       type: Boolean,
       select: false,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     locations: [pointSchema],
     slug: String,
   },
@@ -98,7 +102,10 @@ dealershipSchema.pre("save", function (next) {
 });
 
 dealershipSchema.pre(/^find/, function (next) {
-  this.populate("owner");
+  this.populate({
+    path: "owner",
+    select: "name photo -_id",
+  });
   next();
 });
 

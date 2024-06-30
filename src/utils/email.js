@@ -54,13 +54,13 @@ export default class Email {
   }
 
   async sendWelcome() {
-    await this.send("sendWelcome", "Welcome to Your Email");
+    await this.send("sendWelcome", "Welcome to Auto Lease");
   }
 
   async sendPasswordReset() {
     await this.send(
       "resetPassword",
-      "Your password reset token (valid for only 10 minutes)",
+      "Password reset requested (valid for only 10 minutes)",
     );
   }
 

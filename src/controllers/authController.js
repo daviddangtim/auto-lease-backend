@@ -104,13 +104,12 @@ export const verify = catchAsync(async (req, res, next) => {
 
   if (!otp) {
     return next(
-      new AppError("OTP is required to verify it's you loggin in", 400),
+      new AppError("OTP is required to verify it's you login in", 400),
     );
   }
 
-  const hashedOtp = createHash(otp);
   const user = await User.findOne({
-    otp: hashedOtp,
+    otp: createHash(otp),
     otpExpires: { $gt: Date.now() },
   }).exec();
 
@@ -193,7 +192,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 });
 
 export const protect = catchAsync(async (req, res, next) => {
-  const { authorization } = req;
+  const { authorization } = req.headers;
   let token;
 
   if (authorization && authorization.startsWith("Bearer ")) {
@@ -216,7 +215,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  if (user.passwordChangedAfterJwt) {
+  if (user.passwordChangedAfterJwt(decoded.isa)) {
     return next(new AppError("User recently changed password.", 401));
   }
 
