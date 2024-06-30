@@ -1,4 +1,3 @@
-// TODO: REMOVE ALL CODES THAT SHOULD BE RUN ONLY ON DEV WHEN YOU ARE DONE WITH THE PROJECT
 import AppError from "../utils/appError.js";
 import Email from "../utils/email.js";
 import { verify as jwtVerify } from "../utils/jwt.js";
@@ -12,7 +11,15 @@ import {
   filterObject,
   isProduction,
 } from "../utils/utils.js";
-import chalk from "chalk";
+import {
+  comparePassword,
+  confirmUserAndSave,
+  destroyOtpAndSave,
+  destroyPasswordResetTokenAndSave,
+  generateAndSaveOtp,
+  generateAndSavePasswordResetToken,
+  passwordChangedAfterJwt,
+} from "../utils/userHelper.js";
 
 export const signUp = catchAsync(async (req, res, next) => {
   const payload = filterObject(req.body, [
@@ -30,17 +37,21 @@ export const requestConfirmationToken = catchAsync(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
-    return next(new AppError("Email is required", 400));
+    return next(
+      new AppError("Email is required to request a confirmation token.", 400),
+    );
   }
 
   const user = await User.findOne({ email }).exec();
 
   if (!user) {
-    return next(new AppError("No user found with this email.", 404));
+    return next(
+      new AppError("No user found with the provided email address.", 404),
+    );
   }
 
   if (user.isUserConfirmed) {
-    return next(new AppError("User is already confirmed", 409));
+    return next(new AppError("This user is already confirmed.", 409));
   }
 
   await sendConfirmationToken(req, res, next, user);
@@ -50,21 +61,24 @@ export const confirmUser = catchAsync(async (req, res, next) => {
   const { token } = req.params;
 
   if (!token) {
-    return next(new AppError("Token is required", 400));
+    return next(new AppError("Confirmation token is required.", 400));
   }
 
-  const hashedToken = createHash(token);
-
   const user = await User.findOne({
-    userConfirmationToken: hashedToken,
+    userConfirmationToken: createHash(token),
     userConfirmationTokenExpires: { $gt: Date.now() },
   }).exec();
 
   if (!user) {
-    return next(new AppError("Token is incorrect or expired", 401));
+    return next(
+      new AppError(
+        "The token provided is either incorrect or has expired.",
+        401,
+      ),
+    );
   }
 
-  await user.confirmUser();
+  await confirmUserAndSave(user);
   await new Email(user, `${baseUrl(req)}/api/v1/user/me`).sendWelcome();
   await generateAndSendJwtCookie(user, res);
 });
@@ -73,30 +87,37 @@ export const signIn = catchAsync(async (req, res, next) => {
   const { password, email } = req.body;
 
   if (!password || !email) {
-    return next(new AppError("Password and email are required", 401));
+    return next(new AppError("Both password and email are required.", 401));
   }
 
   const user = await User.findOne({ email }).select("+password").exec();
 
-  if (!user || !(await user.comparePassword(password, user.password))) {
-    return next(new AppError("Incorrect password or email", 401));
+  if (!user || !(await comparePassword(password, user.password))) {
+    return next(new AppError("Incorrect password or email.", 401));
   }
 
+  // TODO: remove the second condition when done
   if (!user.isUserConfirmed && isProduction) {
-    await sendConfirmationToken(req, res, next, user, 401);
+    return await sendConfirmationToken(req, res, next, user, 401);
   }
 
   try {
-    const otp = await user.generateAndSaveOtp(); // TODO: SEND OTP VIA EMAIL
+    const otp = await generateAndSaveOtp(user);
     await new Email(user, otp).sendOtp();
 
     res.status(200).send({
       statusText: "success",
-      message: "OTP is sent to your email",
-      otp: isProduction ? undefined : otp,
+      message: "An OTP has been sent to your email.",
+      otp: isProduction ? undefined : otp, // TODO: remove this when done
     });
   } catch (err) {
-    await user.destroyOtp();
+    await destroyOtpAndSave(user);
+    return next(
+      new AppError(
+        "There was an error sending the OTP. Please try again.",
+        500,
+      ),
+    );
   }
 });
 
@@ -104,9 +125,7 @@ export const verify = catchAsync(async (req, res, next) => {
   const { otp } = req.body;
 
   if (!otp) {
-    return next(
-      new AppError("OTP is required to verify it's you login in", 400),
-    );
+    return next(new AppError("OTP is required to verify your login.", 400));
   }
 
   const user = await User.findOne({
@@ -115,10 +134,12 @@ export const verify = catchAsync(async (req, res, next) => {
   }).exec();
 
   if (!user) {
-    return next(new AppError("OTP is incorrect or expired", 401));
+    return next(
+      new AppError("The OTP provided is either incorrect or has expired.", 401),
+    );
   }
 
-  await user.destroyOtp();
+  await destroyOtpAndSave(user);
   await generateAndSendJwtCookie(user, res);
 });
 
@@ -126,27 +147,31 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
-    return next(new AppError("Email is required", 400));
+    return next(new AppError("Email is required to reset password.", 400));
   }
 
   const user = await User.findOne({ email }).exec();
 
   if (!user) {
-    return next(new AppError("User with this email does not exits", 404));
+    return next(
+      new AppError("No user found with the provided email address.", 404),
+    );
   }
 
-  const token = await user.generateAndSavePasswordResetToken();
+  const token = await generateAndSavePasswordResetToken(user);
   const url = `${baseUrl(req)}/auth/reset-password/${token}`;
 
   try {
     await new Email(user, url).sendPasswordReset();
     res.status(200).send({
       statusText: "success",
-      message: `Please check the email address ${email} for instructions to reset your password`,
+      message: `Please check the email address ${email} for instructions to reset your password.`,
     });
   } catch (err) {
-    await user.destroyPasswordResetToken();
-    return next(new AppError("There was an error sending the email", 500));
+    await destroyPasswordResetTokenAndSave(user);
+    return next(
+      new AppError("There was an error sending the password reset email.", 500),
+    );
   }
 });
 
@@ -154,16 +179,20 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   const { token } = req.params;
 
   if (!token) {
-    return next(new AppError("Token is required", 400));
+    return next(new AppError("Reset token is required.", 400));
   }
 
   const { password, passwordConfirm } = req.body;
 
   if (!password || !passwordConfirm) {
     return next(
-      new AppError("Password and password confirm are required", 401),
+      new AppError(
+        "Both password and password confirmation are required.",
+        401,
+      ),
     );
   }
+
   const user = await User.findOne({
     passwordResetToken: createHash(token),
     passwordResetTokenExpires: { $gt: Date.now() },
@@ -172,20 +201,26 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     .exec();
 
   if (!user) {
-    return next(new AppError("Token is incorrect or expired", 401));
+    return next(
+      new AppError(
+        "The reset token provided is either incorrect or has expired.",
+        401,
+      ),
+    );
   }
 
-  if (await user.comparePassword(password, user.password)) {
+  if (await comparePassword(password, user.password)) {
     return next(
-      new AppError("new password cannot be same as old password.", 400),
+      new AppError(
+        "The new password cannot be the same as the old password.",
+        400,
+      ),
     );
   }
 
   user.password = password;
   user.passwordConfirm = passwordConfirm;
-
-  await user.save();
-  await user.destroyPasswordResetToken();
+  await destroyPasswordResetTokenAndSave(user);
 
   res.status(200).send({
     statusText: "success",
@@ -203,24 +238,34 @@ export const protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError("You are not logged in. Log in to get access", 401),
+      new AppError("You are not logged in. Please log in to get access.", 401),
     );
   }
 
   const decoded = await jwtVerify(token);
-  const user = await User.findById(decoded.id).exec();
+  const user = await User.findById(decoded.id, {}, { lean: true })
+    .select("+passwordChangedAt")
+    .exec();
 
   if (!user) {
     return next(
-      new AppError("The user associated with this account no longer exits"),
-      401,
+      new AppError(
+        "The user associated with this account no longer exists.",
+        401,
+      ),
     );
   }
 
-  if (user.passwordChangedAfterJwt(decoded.isa)) {
-    return next(new AppError("User recently changed password.", 401));
+  if (passwordChangedAfterJwt(decoded.iat, user.passwordChangedAt)) {
+    return next(
+      new AppError(
+        "User recently changed their password. Please log in again.",
+        401,
+      ),
+    );
   }
 
+  user.passwordChangedAt = undefined;
   req.user = user;
   next();
 });
@@ -233,7 +278,7 @@ export const restrictTo =
     if (!user.isUserConfirmed) {
       return next(
         new AppError(
-          "Your account needs to be confirmed to access this resource",
+          "Your account needs to be confirmed to access this resource.",
           403,
         ),
       );
@@ -241,7 +286,7 @@ export const restrictTo =
 
     if (!roles.includes(user.role)) {
       return next(
-        new AppError("You are not authorized to access this resource", 403),
+        new AppError("You are not authorized to access this resource.", 403),
       );
     }
     return next();
