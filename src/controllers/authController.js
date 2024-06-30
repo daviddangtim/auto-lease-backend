@@ -192,7 +192,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 });
 
 export const protect = catchAsync(async (req, res, next) => {
-  const { authorization } = req;
+  const { authorization } = req.headers;
   let token;
 
   if (authorization && authorization.startsWith("Bearer ")) {
@@ -215,7 +215,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  if (user.passwordChangedAfterJwt) {
+  if (user.passwordChangedAfterJwt(decoded.isa)) {
     return next(new AppError("User recently changed password.", 401));
   }
 

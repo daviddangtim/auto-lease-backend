@@ -104,7 +104,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     otp: {
-      type: Date,
+      type: String,
       select: false,
     },
     otpExpires: {
@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
-    profilePhoto: String,
+    photo: String,
     driversLicense: String,
     location: pointSchema,
     isUserConfirmed: Boolean,

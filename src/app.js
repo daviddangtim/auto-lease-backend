@@ -10,6 +10,7 @@ import mongoSanitize from "express-mongo-sanitize";
 // PROJECT IMPORTS
 import AppError from "./utils/appError.js";
 import globalError from "./controllers/errorController.js";
+import { keepAwake } from "./utils/croneJobs.js";
 import userRouter from "./routes/userRouter.js";
 import authRouter from "./routes/authRouter.js";
 import dealershipRouter from "./routes/dealershipRouter.js";
@@ -18,6 +19,9 @@ import carRouter from "./routes/carRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 
 const app = express();
+
+//CRON JOBS
+(async () => await keepAwake())();
 
 const limiter = rateLimit({
   max: 100,

@@ -5,7 +5,7 @@ import AppError from "./appError.js";
 export const catchAsync = (cb) => (req, res, next) =>
   cb(req, res, next).catch(next);
 
-export const baseUrl = (req) => `${req.protocol}://${req.get("host")}`;
+export const baseUrl = (req) => `${req.protocol}://${req.get("host")}/api/v1`;
 
 export const isProduction = process.env.NODE_ENV === "production";
 
