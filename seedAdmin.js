@@ -36,9 +36,9 @@ const seedAdmin = async () => {
         password: answers.password,
         passwordConfirm: answers.passwordConfirm,
         role: answers.role,
+        isUserConfirmed: true,
       });
 
-      admin.isUserConfirmed = true;
       await admin.save();
       isSuccessful = true;
       console.log(chalk.blueBright("Admin saved:", admin));
