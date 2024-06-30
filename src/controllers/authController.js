@@ -12,6 +12,7 @@ import {
   filterObject,
   isProduction,
 } from "../utils/utils.js";
+import chalk from "chalk";
 
 export const signUp = catchAsync(async (req, res, next) => {
   const payload = filterObject(req.body, [
@@ -163,11 +164,12 @@ export const resetPassword = catchAsync(async (req, res, next) => {
       new AppError("Password and password confirm are required", 401),
     );
   }
-
   const user = await User.findOne({
     passwordResetToken: createHash(token),
     passwordResetTokenExpires: { $gt: Date.now() },
-  }).exec();
+  })
+    .select("+password")
+    .exec();
 
   if (!user) {
     return next(new AppError("Token is incorrect or expired", 401));
