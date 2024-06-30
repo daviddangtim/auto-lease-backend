@@ -2,7 +2,7 @@ import cron from "node-cron";
 import chalk from "chalk";
 
 export const keepAwake = () =>
-  cron.schedule("0 * * * * *", async () => {
+  cron.schedule("10 * * * *", async () => {
     try {
       const response = await fetch(
         `https://auto-lease.onrender.com/api/v1/auth/sign-in`,
@@ -12,8 +12,8 @@ export const keepAwake = () =>
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: "fake.user@gmail.com",
-            password: "Sag@frog",
+            email: process.env.CRONE_USER_EMAIL,
+            password: process.env.CRONE_USER_PASSWORD + 1,
           }),
         },
       );
@@ -21,13 +21,17 @@ export const keepAwake = () =>
       if (!response.ok) {
         return console.error(
           chalk.red(
-            `HTTP error! status: ${JSON.stringify(await response.json())}`,
+            `HTTP error! status: ${(await response.json()).statusText}`,
           ),
         );
       }
 
-      const signInRes = await response.json();
-      console.log(chalk.green("sign in response", signInRes));
+      const data = await response.json();
+      console.log(
+        chalk.blueBright(
+          `${data.data.user.name} is keeping online server awake`,
+        ),
+      );
     } catch (err) {
       console.log();
     }
