@@ -6,6 +6,18 @@ import AppQueries from "../utils/appQueries.js";
 import {ROLES} from "../utils/constants.js";
 
 const {ADMIN} = ROLES;
+const deleteImage = catchAsync( async (publicId)=>{
+    await cloudinary.uploader.destroy(publicId)
+})
+
+const uploadImage = catchAsync( async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+            allowed_formats: ['jpeg', 'png', 'jpg']
+        });
+        const resultObj = {imageUrl:result.secure_url, imageId: result.public_id}
+        return resultObj;
+})
+
 
 export const createCar = catchAsync(async (req, res, next) => {
     const car = await new Car({
@@ -96,18 +108,7 @@ export const getCarV1 = (exposeSensitiveFields = false) =>
 });
 
 export const updateCarV1 = catchAsync(async(req,res,next)=>{
-    let updates ={...req.body};
 
-
-    if(req?.user?.role !== ADMIN){
-        car = await Car.updateOne({ _id : req.params.id},{$set:{updates}})
-            .select();
-    } else {
-        car = await Car.findByIdAndUpdate(req.params.id,{$set:{updates}})
-    }
-
-    if(!car)
-    const car = await Car.findByIdAndUpdate(req.params.id,)
 })
 
 export const getCars = catchAsync(async (req, res, next) => {});
