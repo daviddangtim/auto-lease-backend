@@ -91,8 +91,18 @@ export const dealershipSchema = new mongoose.Schema(
     locations: [pointSchema],
     slug: String,
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
+
+dealershipSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "dealership",
+  localField: "_id",
+});
 
 dealershipSchema.pre("save", function (next) {
   if (!this.isModified("slug")) {
@@ -104,7 +114,12 @@ dealershipSchema.pre("save", function (next) {
 dealershipSchema.pre(/^find/, function (next) {
   this.populate({
     path: "owner",
-    select: "name photo -_id",
+    select: "name photo _id",
+  });
+
+  this.populate({
+    path: "cars",
+    select: "name",
   });
   next();
 });

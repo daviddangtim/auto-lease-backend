@@ -18,13 +18,13 @@ const sendConfirmationToken = async (
   const url = `${baseUrl(req)}/auth/confirm-user/${token}`; // TODO: Construct this URL based on the frontend
 
   try {
-    await new Email(user, url).sendConfirmation();
+    await new Email(user, { url }).sendConfirmation();
 
     // Handle unconfirmed user sign-in scenario
     if (statusCode === 401) {
       return next(
         new AppError(
-          "User is not yet confirmed. A confirmation token has been sent to your email.",
+          "You not yet confirmed. A confirmation token has been sent to your email.",
           statusCode,
         ),
       );
@@ -42,7 +42,8 @@ const sendConfirmationToken = async (
     await destroyUserConfirmationTokenAndSave(user);
 
     // Log the error for debugging
-    console.error(chalk.red("Error sending confirmation email: ", err));
+    isProduction &&
+      console.error(chalk.red("Error sending confirmation email: ", err));
 
     // Handle user creation with email sending failure
     if (statusCode === 201) {

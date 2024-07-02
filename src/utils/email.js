@@ -3,20 +3,17 @@ import pug from "pug";
 import { convert } from "html-to-text";
 import { __dirname } from "./dirname.js";
 import { join } from "node:path";
+import { options } from "@prettier/plugin-pug";
 
 export default class Email {
-  constructor(user, payload) {
+  constructor(user, options = {}) {
     this.to = user.email;
     this.name = user.name.split(" ")[0];
-    this.payload = payload;
+    this.options = options;
     this.from = `Auto Lease <${process.env.EMAIL_FROM}>`;
   }
 
   createTransport() {
-    // if (process.env.NODE_ENV === "production") {
-    //   return 1;
-    // }
-
     return nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -26,13 +23,16 @@ export default class Email {
     });
   }
 
-  async send(template, subject) {
+  async send(template, subject, cb = () => {}) {
+    const options = {
+      firstName: this.name,
+      url: this.options?.url,
+    };
+
+    cb(options);
     const html = pug.renderFile(
       `${join(__dirname, "../views/emails", `${template}.pug`)}`,
-      {
-        firstName: this.name,
-        payload: this.payload,
-      },
+      options,
     );
 
     const mailOptions = {
@@ -68,6 +68,40 @@ export default class Email {
     await this.send(
       "sendOtp",
       "Your One Time Password (valid for only 2 minutes)",
+    );
+  }
+
+  async sendApplyDealership() {
+    await this.send(
+      "sendApplyDealership",
+      "Dealership Application status (pending)",
+    );
+  }
+
+  async sendApprovedDealership() {
+    await this.send(
+      "sendApprovedDealership",
+      "Dealership Application status (approved)",
+    );
+  }
+
+  async sendRejectDealership() {
+    await this.send(
+      "sendRejectDealership",
+      "Reject Application status (Rejected)",
+      (options) => {
+        options.reason = this.options?.reason;
+      },
+    );
+  }
+
+  async sendRevokeDealership() {
+    await this.send(
+      "sendRevokeDealership",
+      "Revoke Application status (Revoked)",
+      (options) => {
+        options.reason = this.options?.reason;
+      },
     );
   }
 }
