@@ -35,6 +35,7 @@ export const updateMyPasswordV1 = catchAsync(async (req, res, next) => {
 
   // COMPARE THE PASSWORDS
   if (!(await user.comparePassword(currentPassword, user.password))) {
+    // TODO: NOTICE THE ERROR THAT OCCURS WHEN NO PAYLOAD IS PASSES SO THAT IT CAN BE HANDLED IN THE ERROR MIDDLEWARE
     return next(new AppError("Current password is incorrect", 401));
   }
 
