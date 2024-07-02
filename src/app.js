@@ -21,7 +21,7 @@ import reviewRouter from "./routes/reviewRouter.js";
 const app = express();
 
 //CRON JOBS
-(async () => await keepAwake())();
+keepAwake();
 
 const limiter = rateLimit({
   max: 100,
@@ -37,11 +37,11 @@ app.use(xss());
 app.use(morgan("dev"));
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admin", adminRouter);
-app.use("/api/v1/dealership", dealershipRouter);
-app.use("/api/v1/car", carRouter);
-app.use("/api/v1/review", reviewRouter);
+app.use("/api/v1/dealerships", dealershipRouter);
+app.use("/api/v1/cars", carRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 app.all("*", (req, res, next) => {
   return next(new AppError(`${req.originalUrl} is not on this server`, 404));

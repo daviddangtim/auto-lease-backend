@@ -5,11 +5,12 @@ import pointSchema from "./pointSchema.js";
 
 const carSchema = new mongoose.Schema(
   {
-      dealership :{
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Dealership",
-          required: [true, "A car must have a dealership"],
-      },
+    dealership: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dealership",
+      required: [true, "A car must have a dealership"],
+    },
+
     name: {
       type: String,
       trim: true,
@@ -68,6 +69,14 @@ const carSchema = new mongoose.Schema(
       type: Date,
       required: [true, "A car must have a lease duration"],
     },
+    coverImage:{
+          type: String,
+        required: true
+    },
+    coverImageId :{
+          type: String,
+        required:true
+    },
     photos: {
       type: [String],
       required: [true, "A car must have at least a photo"],
@@ -76,10 +85,10 @@ const carSchema = new mongoose.Schema(
         "Photos array must contain between 1 and 10 items",
       ],
     },
-      photosId:{
-        type: [String],
-        required:[true,"A car photo must have an id"]
-      },
+    photosId: {
+      type: [String],
+      required: [true, "A car photo must have an id"],
+    },
     price: {
       type: Number,
       required: [true, "A car must have a price"],
@@ -89,7 +98,6 @@ const carSchema = new mongoose.Schema(
       type: Number,
       required: [true, "A car must have a lease fee"],
       validate: {
-        //TODO: confirm the min and max price fee
         validator: function (value) {
           const price =
             this.price !== undefined ? this.price : this.get("price");
@@ -100,6 +108,7 @@ const carSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
+      default: 0,
       validate: {
         validator: (v) => v >= 0 && v <= 100,
         message: "Discount must be between 0% to 100%",
@@ -107,7 +116,7 @@ const carSchema = new mongoose.Schema(
     },
     locations: {
       type: [pointSchema],
-      required: [true, "A car must have a location"],
+      required: [true, "A car must have at least  location"],
       validate: [
         limitArrayLength(5, 1),
         "Location array must contain between 1 and 5 items",
@@ -125,6 +134,10 @@ carSchema.pre("save", function (next) {
   if (!this.isModified("slug")) {
     this.name = slugify(this.name, { lower: true });
   }
+  next();
+});
+
+carSchema.pre("save", function (next) {
   next();
 });
 

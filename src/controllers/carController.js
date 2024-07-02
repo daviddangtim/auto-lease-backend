@@ -1,7 +1,8 @@
-import { catchAsync } from "../utils/utils.js";
+import { catchAsync, filterObject } from "../utils/utils.js";
 import Car from "../models/carModel.js";
 import { cloudinary } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";
+import Dealership from "../models/dealershipModel.js";
 
 export const createCar = catchAsync(async (req, res, next) => {
   const car = await new Car({
@@ -27,6 +28,32 @@ export const createCar = catchAsync(async (req, res, next) => {
     data: {
       car,
     },
+  });
+});
+
+// TODO: Implement photo functionality
+export const createCarV1 = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+  const dealership = await Dealership.findOne(
+    { owner: { _id: userId } },
+    { _id: 1 },
+    { lean: true },
+  ).exec();
+
+  if (!dealership) {
+    return next(new AppError("No dealership found with this ID", 404));
+  }
+
+  const payload = filterObject(req.body, ["slug", "isAvailable"], {
+    exclude: true,
+  });
+
+  payload.dealership = dealership._id;
+  const car = await Car.create(payload);
+
+  res.status(201).json({
+    statusText: "success",
+    data: { car },
   });
 });
 

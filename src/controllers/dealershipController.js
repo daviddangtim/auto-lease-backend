@@ -4,38 +4,27 @@ import { catchAsync, filterObject, isProduction } from "../utils/utils.js";
 import Dealership from "../models/dealershipModel.js";
 import User from "../models/userModel.js";
 import { ROLES } from "../utils/constants.js";
+import { comparePassword } from "../utils/userHelper.js";
 
 const { ADMIN, DEALER } = ROLES;
 
+export const createMyDealership = (req, res, next) => {
+  req.params.id = req.user.id;
+  console.log(req.params);
+  next();
+};
+
 export const createDealership = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  console.log(req.params);
   const { user } = req;
-  const id =
-    user?.role === ADMIN
-      ? req.params?.id
-      : user?._id || "667b6a878941451af60400da"; //temporal;
+  const isAdmin = user?.role === ADMIN;
 
   if (await Dealership.findOne({ owner: id }, {}, { lean: true }).exec()) {
     return next(new AppError("Dealership with this user already exists", 409));
   }
 
-  const payload = filterObject(
-    req.body,
-    isProduction
-      ? [
-          "isApproved",
-          "isRejected",
-          "slug",
-          "ratingsAverage",
-          "ratingsQuantity",
-        ]
-      : [""],
-    {
-      exclude: true,
-    },
-  );
-
-  if (user?.role === ADMIN) {
-    // This user has shadowed the higher scoped user and will represent the queried user
+  if (isAdmin) {
     const user = await User.findById(id, {}, { lean: true }).exec();
     if (!user) {
       return next(new AppError("User with this ID those not exit", 404));
@@ -50,30 +39,39 @@ export const createDealership = catchAsync(async (req, res, next) => {
     }
   }
 
+  const payload = filterObject(
+    req.body,
+    isProduction ? ["slug", "ratingsAverage", "ratingsQuantity"] : [""],
+    {
+      exclude: true,
+    },
+  );
+
   payload.owner = id;
   const dealership = await Dealership.create(payload);
 
-  res.status(202).json({
-    statusText: "success",
-    data: { dealership },
-  });
+  if (isAdmin) {
+    return res.status(202).json({
+      statusText: "success",
+      data: { dealership },
+    });
+  }
+  next();
 });
 
 export const getDealership = catchAsync(async (req, res, next) => {
   let dealership;
   const isAuthorized = req.user?.role === ADMIN || req.user?.role === DEALER;
 
-  console.log(isAuthorized, req.user?.role);
   if (isAuthorized) {
     dealership = await Dealership.findById(req.params.id, {}, { lean: true })
       .select("+cacCertificate +isApproved +dealershipLicence")
+      .populate("review")
       .exec();
   } else {
-    dealership = await Dealership.findById(
-      req.params.id,
-      {},
-      { lean: true },
-    ).exec();
+    dealership = await Dealership.findById(req.params.id, {}, { lean: true })
+      .populate("review")
+      .exec();
   }
 
   if (!dealership) {
@@ -109,9 +107,7 @@ export const getAllDealerships = catchAsync(async (req, res, next) => {
       .paginate();
   }
 
-  const dealerships = await (isAdmin
-    ? appQueries.query
-    : appQueries.query.select("-cacCertificate -dealershipLicense"));
+  const dealerships = await appQueries.query;
 
   res.status(200).json({
     statusText: "success",
@@ -137,7 +133,7 @@ export const updateMyDealership = catchAsync(async (req, res, next) => {
   );
 
   const updateDealership = await Dealership.findOneAndUpdate(
-    { owner: req.user?._id },
+    { owner: req.user?.id },
     payload,
     { includeResultMetadata: true, lean: true, new: true },
   ).exec();
@@ -155,7 +151,7 @@ export const updateMyDealership = catchAsync(async (req, res, next) => {
 });
 
 export const updateMyDealershipCerts = catchAsync(async (req, res, next) => {
-  const userId = req.user?._id;
+  const userId = req.user?.id;
   const payload = filterObject(req.body, [
     "cacCertificate",
     "dealershipLicence",
@@ -168,9 +164,11 @@ export const updateMyDealershipCerts = catchAsync(async (req, res, next) => {
     );
   }
 
-  const user = await User.findById(userId).exec();
+  const user = await User.findById(userId, {}, { lean: true })
+    .select("+password")
+    .exec();
 
-  if (!(await user.comparePassword(payload.password, user.password))) {
+  if (!(await comparePassword(payload.password, user.password))) {
     return next(new AppError("Password is incorrect", 403));
   }
 
