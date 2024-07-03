@@ -57,6 +57,38 @@ export const createCarV1 = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getCarsV1 = catchAsync( async (req, res, next)=>{
+  const isAdmin = req.user?.role === ADMIN;
+  let appQueries;
+
+  if (isAdmin) {
+    appQueries = new AppQueries(
+        req.query,
+        Car.find({}, {}, { lean: true }),
+    )
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+  } else {
+    appQueries = new AppQueries(
+        req.query,
+        Car.find({}, {}, { lean: true }),
+    )
+        .filter()
+        .sort()
+        .paginate();
+  }
+
+  const  cars = await appQueries.query;
+
+  res.status(200).json({
+    statusText: "success",
+    numResult: cars.length,
+    data: { cars },
+  });
+});
+
 export const getCars = catchAsync(async (req, res, next) => {});
 export const getCar = catchAsync(async (req, res, next) => {});
 export const updateCar = catchAsync(async (req, res, next) => {});
