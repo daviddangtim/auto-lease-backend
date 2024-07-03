@@ -120,7 +120,6 @@ const userSchema = new mongoose.Schema(
     driversLicense: String,
     location: pointSchema,
     isUserConfirmed: Boolean,
-    isApplyForDealership: Boolean,
   },
   { timestamps: true },
 );
@@ -144,22 +143,6 @@ userSchema.pre(/^find/, function (next) {
   this.find({ isActive: { $ne: false } });
   next();
 });
-
-userSchema.methods.dealershipApplicationResponse = async function (status) {
-  if (this.dealershipApplicationStatus === APPROVED) {
-    throw new AppError("Cannot modify an already application", 403);
-  }
-  this.dealershipApplicationStatus = status;
-  await this.save({ validateBeforeSave: false });
-};
-
-userSchema.methods.revokeDealershipApplication = async function () {
-  if (this.dealershipApplicationStatus !== APPROVED) {
-    throw new AppError("Only approved applications can be revoked", 403);
-  }
-  this.dealershipApplicationStatus = REJECTED;
-  await this.save({ validateBeforeSave: false });
-};
 
 const User = mongoose.model("User", userSchema);
 

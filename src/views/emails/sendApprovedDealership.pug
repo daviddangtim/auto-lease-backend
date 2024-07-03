@@ -1,0 +1,18 @@
+extends baseEmail
+
+block content
+  p Hi #{ firstName },
+  p Congratulations! Your dealership application has been approved 🎉
+  p Welcome to Auto Lease, we're excited to have you as part of our family.
+  p To manage your dealership and start adding cars, please visit your dealership page using the link below:
+  table.btn.btn-primary(role="presentation")
+    tbody
+      tr
+        td
+          table(role="presentation")
+            tbody
+              tr
+                td
+                  a(href=`${url}`, target="_blank") Go to Your Dealership Page
+  p If you need any assistance, please don't hesitate to contact us.
+  p - The Auto Lease Team

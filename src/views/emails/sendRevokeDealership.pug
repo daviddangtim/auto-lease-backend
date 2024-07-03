@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Hi #{ firstName },Team
+  p We regret to inform you that your dealership status has been revoked.
+  p Reason:
+    strong #{ reason }
+  p Please feel free to contact us for more information.
+  p - The Auto Lease Team

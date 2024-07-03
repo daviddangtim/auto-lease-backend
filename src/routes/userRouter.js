@@ -1,11 +1,18 @@
 import express from "express";
 import * as userController from "../controllers/userController.js";
+import { protect, restrictTo } from "../controllers/authController.js";
+import { ROLES } from "../utils/constants.js";
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
+const { USER } = ROLES;
 
-router.patch("/update-me", userController.updateMe);
-router.patch("/delete-me", userController.deleteMe);
-router.patch("update-password", userController.updateMyPassword);
-router.patch("update-profile-photo", userController.updateProfilePhoto);
+router.use(protect);
+
+router.patch("/apply", restrictTo(USER), userController.applyForDealership);
+
+router.patch("/updateMe", userController.updateMe);
+router.patch("/deleteMe", userController.deleteMe);
+router.patch("/updateMyPassword", userController.updateMyPassword);
+router.patch("/updateMyProfilePhoto", userController.updateProfilePhoto);
 
 export default router;

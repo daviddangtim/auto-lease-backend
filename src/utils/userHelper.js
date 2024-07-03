@@ -41,7 +41,7 @@ export const generateAndSavePasswordResetToken = async (user) => {
 export const destroyPasswordResetTokenAndSave = async (user) => {
   user.passwordResetToken = undefined;
   user.passwordResetTokenExpires = undefined;
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 };
 
 export const confirmUserAndSave = async (user) => {

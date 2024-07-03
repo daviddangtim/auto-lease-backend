@@ -79,7 +79,9 @@ export const confirmUser = catchAsync(async (req, res, next) => {
   }
 
   await confirmUserAndSave(user);
-  await new Email(user, `${baseUrl(req)}/api/v1/user/me`).sendWelcome();
+  await new Email(user, {
+    url: `${baseUrl(req)}/api/v1/user/me`,
+  }).sendWelcome();
   await generateAndSendJwtCookie(user, res);
 });
 
@@ -103,7 +105,7 @@ export const signIn = catchAsync(async (req, res, next) => {
 
   try {
     const otp = await generateAndSaveOtp(user);
-    await new Email(user, otp).sendOtp();
+    await new Email(user, { otp }).sendOtp();
 
     res.status(200).send({
       statusText: "success",
@@ -112,9 +114,12 @@ export const signIn = catchAsync(async (req, res, next) => {
     });
   } catch (err) {
     await destroyOtpAndSave(user);
+    console.log(err);
     return next(
       new AppError(
-        "There was an error sending the OTP. Please try again.",
+        isProduction
+          ? "There was an error sending the OTP. Please try again."
+          : `There was an error sending the OTP: ${err.message}`,
         500,
       ),
     );
@@ -162,7 +167,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const url = `${baseUrl(req)}/auth/reset-password/${token}`;
 
   try {
-    await new Email(user, url).sendPasswordReset();
+    await new Email(user, { url }).sendPasswordReset();
     res.status(200).send({
       statusText: "success",
       message: `Please check the email address ${email} for instructions to reset your password.`,
@@ -243,7 +248,7 @@ export const protect = catchAsync(async (req, res, next) => {
   }
 
   const decoded = await jwtVerify(token);
-  const user = await User.findById(decoded.id, {}, { lean: true })
+  const user = await User.findById(decoded.id)
     .select("+passwordChangedAt")
     .exec();
 
