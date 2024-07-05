@@ -35,7 +35,7 @@ export const createCar = catchAsync(async (req, res, next) => {
 export const createCarV1 = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
   const dealership = await Dealership.findOne(
-    { owner: { _id: userId } },
+    { car: { _id: userId } },
     { _id: 1 },
     { lean: true },
   ).exec();
@@ -73,7 +73,7 @@ export const getCarsV1 = catchAsync( async (req, res, next)=>{
   } else {
     appQueries = new AppQueries(
         req.query,
-        Car.find({}, {}, { lean: true }),
+        Car.find({}, {}, { lean: true })
     )
         .filter()
         .sort()
@@ -86,6 +86,28 @@ export const getCarsV1 = catchAsync( async (req, res, next)=>{
     statusText: "success",
     numResult: cars.length,
     data: { cars },
+  });
+});
+
+export const getCarV1 = catchAsync(async (req, res, next)=>{
+  const car = await Car.findById(req.params.id);
+
+  const isAdmin = req.user?.role === ADMIN;
+  const owner = req.user?._id.toString() === car?.dealership?.toString();
+
+  if (!car) {
+    return next(new AppError("Dealership not found", 404));
+  }
+
+  if(owner || isAdmin) {
+    car.select("+vin +imei +plateNumber ");
+  } else{
+    car.select("-vin +imei -plateNumber ");
+  }
+
+  res.status(200).json({
+    statusText: "success",
+    data: { car },
   });
 });
 
