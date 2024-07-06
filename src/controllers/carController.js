@@ -1,13 +1,22 @@
 import { catchAsync, filterObject } from "../utils/utils.js";
 import Car from "../models/carModel.js";
-import { cloudinary } from "../utils/imageUploader.js";
+import { cloudinary, cloudinaryImageUploader } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";
 import Dealership from "../models/dealershipModel.js";
+
+
 
 export const createCar = catchAsync(async (req, res, next) => {
   const car = await new Car({
     ...req.body,
   });
+  const urls = [];
+  const files = req.files;
+  for (const file of files) {
+    const { path } = file;
+    const newPath = await cloudinaryImageUploader(path);
+    urls.push(newPath);
+  }
   car.dealership = req.user._id;
   const image = req.file.path;
 
@@ -57,30 +66,30 @@ export const createCarV1 = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getCarsV1 = catchAsync( async (req, res, next)=>{
+export const getCarsV1 = catchAsync(async (req, res, next) => {
   const isAdmin = req.user?.role === ADMIN;
   let appQueries;
 
   if (isAdmin) {
     appQueries = new AppQueries(
-        req.query,
-        Car.find({}, {}, { lean: true }),
+      req.query,
+      Car.find({}, {}, { lean: true }),
     )
-        .filter()
-        .sort()
-        .limitFields()
-        .paginate();
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
   } else {
     appQueries = new AppQueries(
-        req.query,
-        Car.find({}, {}, { lean: true })
+      req.query,
+      Car.find({}, {}, { lean: true })
     )
-        .filter()
-        .sort()
-        .paginate();
+      .filter()
+      .sort()
+      .paginate();
   }
 
-  const  cars = await appQueries.query;
+  const cars = await appQueries.query;
 
   res.status(200).json({
     statusText: "success",
@@ -89,7 +98,7 @@ export const getCarsV1 = catchAsync( async (req, res, next)=>{
   });
 });
 
-export const getCarV1 = catchAsync(async (req, res, next)=>{
+export const getCarV1 = catchAsync(async (req, res, next) => {
   const car = await Car.findById(req.params.id);
 
   const isAdmin = req.user?.role === ADMIN;
@@ -99,9 +108,9 @@ export const getCarV1 = catchAsync(async (req, res, next)=>{
     return next(new AppError("Dealership not found", 404));
   }
 
-  if(owner || isAdmin) {
+  if (owner || isAdmin) {
     car.select("+vin +imei +plateNumber ");
-  } else{
+  } else {
     car.select("-vin +imei -plateNumber ");
   }
 
@@ -111,7 +120,38 @@ export const getCarV1 = catchAsync(async (req, res, next)=>{
   });
 });
 
-export const getCars = catchAsync(async (req, res, next) => {});
-export const getCar = catchAsync(async (req, res, next) => {});
-export const updateCar = catchAsync(async (req, res, next) => {});
-export const deleteCar = catchAsync(async (req, res, next) => {});
+// Dangtim
+export const updateCarV1 = catchAsync(async (req, res, next) => {
+  const payload = filterObject(req.body, [
+    "slug",
+    "dealership",
+    "isAvailable"
+  ], { exclude: true });
+
+  const updateCar = await Car.findByIdAndUpdate({ dealership: req.user.id },
+    payload,
+    { includeResultMetadata: true, lean: true, new: true },
+  ).exec();
+
+  if (!updateCar) {
+    return next(
+      new AppError("No Car associated with this dealership was found", 404)
+    );
+  }
+
+  res.status(200).json({
+    statusText: "success",
+    data: { updateCar }
+  })
+});
+
+const deleteCarV1 = catchAsync(async (req,res,next)=>{
+const car = await Car.findByIdAndDelete(req.params.id).exec();
+// TODO: Add more flesh to the delete function 
+});
+
+
+export const getCars = catchAsync(async (req, res, next) => { });
+export const getCar = catchAsync(async (req, res, next) => { });
+export const updateCar = catchAsync(async (req, res, next) => { });
+export const deleteCar = catchAsync(async (req, res, next) => { });

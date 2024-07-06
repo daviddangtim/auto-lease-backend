@@ -72,7 +72,7 @@ export const updateProfilePhoto = catchAsync(async (req, res, next) => {
 
   res.status(200)
       .json({
-        status:"Success",
+        statusText:"Success",
         data:{
           user
         }
@@ -127,7 +127,7 @@ export const applyForDealership = catchAsync(async (req, res, next) => {
   await new Email(user).sendApplyDealership();
 
   res.status(200).json({
-    status: "success",
+    statusText: "success",
     message:
       "Your dealership application has been submitted successfully and is now pending review.",
     data: { user },

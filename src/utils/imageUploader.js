@@ -39,4 +39,20 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-export { upload, cloudinary };
+ const cloudinaryImageUploader = async (file) => {
+  const result = await cloudinary.uploader.upload(file, {
+    folder: "auto-lease",
+  });
+  return result;
+};
+
+const cloudinaryImageUpdater = async (fileToUpdate, existingFile) =>{
+  await cloudinary.uploader.destroy(existingFile,{
+    folder:"auto-lease",
+  });
+  const result = await cloudinary.uploader.upload(fileToUpdate,{
+    folder:"auto-lease"
+  });
+}
+
+export { upload, cloudinary, cloudinaryImageUploader, cloudinaryImageUpdater};
