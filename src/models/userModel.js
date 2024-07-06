@@ -117,6 +117,7 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     photo: String,
+    photoId:String,
     driversLicense: String,
     location: pointSchema,
     isUserConfirmed: Boolean,

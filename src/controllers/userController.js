@@ -1,31 +1,36 @@
 import { catchAsync } from "../utils/utils.js";
 import User from "../models/userModel.js";
 import AppError from "../utils/appError.js";
+import {cloudinary, upload} from "../utils/imageUploader.js";
 import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
 import Email from "../utils/email.js";
 import Dealership from "../models/dealershipModel.js";
+import {comparePassword} from "../utils/userHelper.js";
 
 const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
 const { DEALER } = ROLES;
 
 export const updateMyPassword = catchAsync(async (req, res, next) => {
-  const { password } = req.body;
-  const date = new Date();
-  const user = await User.findById(req.user._id);
+  const { user } = req;
+  const { currentPassword, password, passwordConfirm } = req.body;
 
-  if (!user) {
-    return res.status(404).json({ message: "Internal Server Error" });
+ const confirmation =  await comparePassword(currentPassword, user.password)
+
+  if (!confirmation) {
+    // TODO: NOTICE THE ERROR THAT OCCURS WHEN NO PAYLOAD IS PASSES SO THAT IT CAN BE HANDLED IN THE ERROR MIDDLEWARE
+    return next(new AppError("Current password is incorrect", 401));
   }
-
-  await Promise.all(() => {
-    // WHY ARE YOU USING A PROMISE HERE?
-    user.passwordChangedAt = date.now(); // WE DONT NEED THIS BECAUSE BECAUSE IT'S HANDLES BY A MIDDLEWARE
+  if(confirmation){
     user.password = password;
-  });
+    user.passwordConfirm = passwordConfirm;
+  }
 
   await user.save();
 
-  res.status(200).json({ message: "Password Updated Successfully" });
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
 });
 
 export const updateMyPasswordV1 = catchAsync(async (req, res, next) => {
@@ -50,7 +55,30 @@ export const updateMyPasswordV1 = catchAsync(async (req, res, next) => {
   });
 });
 
-export const updateProfilePhoto = catchAsync(async (req, res, next) => {});
+export const updateProfilePhoto = catchAsync(async (req, res, next) => {
+  const {image} = req.file;
+  const user = await findById(req.user._id);
+  await cloudinary.uploader.destroy(user.photoId);
+ const result = await cloudinary.uploader.upload(image);
+
+ if (!result) {
+    return next(new AppError("Unable to upload image", 500));
+  }
+
+  user.photo = result.secure_url;
+  user.photoId = result.public_id;
+
+  await user.save()
+
+  res.status(200)
+      .json({
+        statusText:"Success",
+        data:{
+          user
+        }
+      })
+
+});
 
 export const updateMe = catchAsync(async (req, res, next) => {
   const updates = {};
@@ -99,7 +127,7 @@ export const applyForDealership = catchAsync(async (req, res, next) => {
   await new Email(user).sendApplyDealership();
 
   res.status(200).json({
-    status: "success",
+    statusText: "success",
     message:
       "Your dealership application has been submitted successfully and is now pending review.",
     data: { user },
