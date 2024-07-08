@@ -1,16 +1,8 @@
 import { sign } from "./jwt.js";
-import { createTimeStampInEpoch } from "./utils.js";
+import { createTimeStampInEpoch } from "./helpers.js";
 
-const generateAndSendJwtCookie = async (
-  user,
-  res,
-  message = undefined,
-  statusCode = 200,
-) => {
-  const token = await sign(user._id);
-  user.password = undefined;
-  user.userConfirmationToken = undefined;
-  user.userConfirmationTokenExpires = undefined;
+const generateAndSendJwtCookie = async (user, res) => {
+  const token = await sign(user.id);
   const expires = new Date(
     createTimeStampInEpoch(JSON.parse(process.env.JWT_COOKIE_EXPIRES_IN)),
   );
@@ -21,10 +13,9 @@ const generateAndSendJwtCookie = async (
     httpOnly: true,
   });
 
-  res.status(statusCode).json({
+  res.status(200).json({
     token: token,
     statusText: "success",
-    message,
     data: { user },
   });
 };

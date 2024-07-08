@@ -16,7 +16,7 @@ const startServer = async () => {
   const server = app.listen(port, () => {
     console.log(
       chalk.greenBright(
-        `Server is listening to requests on ${chalk.blueBright.underline(`http://127.0.0.1:${port}`)}`,
+        `Server is listening for requests to ${chalk.blueBright.underline(`http://127.0.0.1:${port}`)}`,
       ),
     );
   });

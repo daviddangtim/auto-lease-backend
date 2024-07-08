@@ -1,6 +1,5 @@
 import crypto from "node:crypto";
 import { promisify } from "node:util";
-import AppError from "./appError.js";
 
 export const catchAsync = (cb) => (req, res, next) =>
   cb(req, res, next).catch(next);
@@ -45,15 +44,9 @@ export const limitArrayLength =
     return len >= min && len <= max;
   };
 
-export const createTimeStampInEpoch = ({
-  s = 0,
-  m = 0,
-  h = 0,
-  d = 0,
-  w = 0,
-  mt = 0,
-  y = 0,
-} = {}) => {
+export const createTimeStampInEpoch = (options = {}) => {
+  const { s = 0, m = 0, h = 0, d = 0, w = 0, mt = 0, y = 0 } = options;
+
   if (
     typeof s !== "number" ||
     typeof m !== "number" ||
