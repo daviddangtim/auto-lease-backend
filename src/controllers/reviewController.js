@@ -1,6 +1,6 @@
 import AppError from "../utils/appError.js";
 import AppQueries from "../utils/appQueries.js";
-import { catchAsync, filterObject } from "../utils/utils.js";
+import { catchAsync, filterObject } from "../utils/helpers.js";
 import Review from "../models/reviewModel.js";
 import Dealership from "../models/dealershipModel.js";
 

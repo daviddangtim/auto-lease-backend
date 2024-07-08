@@ -1,17 +1,10 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import AppError from "../utils/appError.js";
-import {
-  createHash,
-  createRandomBytes,
-  createTimeStampInEpoch,
-  generateOtp,
-} from "../utils/utils.js";
 
 import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
 import pointSchema from "./pointSchema.js";
 
-const { APPROVED, PENDING, REJECTED } = DEALERSHIP_APPLICATION_STATUS;
+const { APPROVED, PENDING, REJECTED, REVOKED } = DEALERSHIP_APPLICATION_STATUS;
 const { USER, DEALER, ADMIN, Driver } = ROLES;
 
 const userSchema = new mongoose.Schema(
@@ -41,12 +34,13 @@ const userSchema = new mongoose.Schema(
         message: `Invalid role. Choose from: ${USER},${DEALER}, ${Driver}, ${ADMIN}`,
       },
     },
-    dealershipApplicationStatus: {
+    applicationStatus: {
       type: String,
       enum: {
         values: [APPROVED, PENDING, REJECTED],
-        message: `Invalid dealership application status. Choose from: ${APPROVED}, ${PENDING} and ${REJECTED}`,
+        message: `Invalid dealership application status. Choose from: ${APPROVED}, ${PENDING}, ${REJECTED} and ${REVOKED}`,
       },
+      select: false,
     },
     password: {
       type: String,
@@ -91,11 +85,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    userConfirmationToken: {
+    verificationToken: {
       type: String,
       select: false,
     },
-    userConfirmationTokenExpires: {
+    verificationTokenExpires: {
       type: Date,
       select: false,
     },
@@ -116,11 +110,17 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+    isVerified: {
+      type: Boolean,
+      select: false,
+    },
+    driversLicense: {
+      type: String,
+      select: false,
+    },
     photo: String,
-    photoId:String,
-    driversLicense: String,
+    photoId: String,
     location: pointSchema,
-    isUserConfirmed: Boolean,
   },
   { timestamps: true },
 );

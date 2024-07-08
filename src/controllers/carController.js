@@ -1,4 +1,4 @@
-import { catchAsync, filterObject } from "../utils/utils.js";
+import { catchAsync, filterObject } from "../utils/helpers.js";
 import Car from "../models/carModel.js";
 import { cloudinary, cloudinaryImageUploader } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";

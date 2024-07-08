@@ -14,7 +14,6 @@ import { keepAwake } from "./utils/croneJobs.js";
 import userRouter from "./routes/userRouter.js";
 import authRouter from "./routes/authRouter.js";
 import dealershipRouter from "./routes/dealershipRouter.js";
-import adminRouter from "./routes/adminRouter.js";
 import carRouter from "./routes/carRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 
@@ -38,7 +37,6 @@ app.use(morgan("dev"));
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/dealerships", dealershipRouter);
 app.use("/api/v1/cars", carRouter);
 app.use("/api/v1/reviews", reviewRouter);

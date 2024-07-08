@@ -3,7 +3,6 @@ import pug from "pug";
 import { convert } from "html-to-text";
 import { __dirname } from "./dirname.js";
 import { join } from "node:path";
-import { options } from "@prettier/plugin-pug";
 
 export default class Email {
   constructor(user, options = {}) {
@@ -46,10 +45,10 @@ export default class Email {
     await this.createTransport().sendMail(mailOptions);
   }
 
-  async sendConfirmation() {
+  async sendVerification(minutes = 10) {
     await this.send(
-      "confirmEmail",
-      "Confirm your email (valid for only 10 minutes)",
+      "verificationEmail",
+      `Confirm your email (valid for only ${minutes} minutes)`,
     );
   }
 
@@ -57,17 +56,20 @@ export default class Email {
     await this.send("sendWelcome", "Welcome to Auto Lease");
   }
 
-  async sendPasswordReset() {
+  async sendPasswordReset(minutes = 10) {
     await this.send(
       "resetPassword",
-      "Password reset requested (valid for only 10 minutes)",
+      `Password reset requested (valid for only ${minutes} minutes)`,
     );
   }
 
-  async sendOtp() {
+  async sendOtp(minutes = 2) {
     await this.send(
       "sendOtp",
-      "Your One Time Password (valid for only 2 minutes)",
+      `Your One Time Password (valid for only ${minutes} minutes)`,
+      (options) => {
+        options.otp = this.options?.otp;
+      },
     );
   }
 
@@ -79,9 +81,15 @@ export default class Email {
   }
 
   async sendApprovedDealership() {
+    const createdByAdmin = this.options?.createdByAdmin;
     await this.send(
       "sendApprovedDealership",
-      "Dealership Application status (approved)",
+      createdByAdmin
+        ? "Your Dealership Has Been Created"
+        : "Dealership Application status (approved)",
+      (options) => {
+        options.createdByAdmin = createdByAdmin;
+      },
     );
   }
 

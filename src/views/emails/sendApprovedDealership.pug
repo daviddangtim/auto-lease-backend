@@ -2,8 +2,14 @@ extends baseEmail
 
 block content
   p Hi #{ firstName },
-  p Congratulations! Your dealership application has been approved 🎉
-  p Welcome to Auto Lease, we're excited to have you as part of our family.
+
+  if createdByAdmin
+    p Congratulations! Your dealership has been created by one of our administrators 🎉
+    p We're excited to have you onboard at Auto Lease. You can start managing your dealership and adding cars right away.
+  else
+    p Congratulations! Your dealership application has been approved 🎉
+    p Welcome to Auto Lease, we're thrilled to have you as part of our family.
+
   p To manage your dealership and start adding cars, please visit your dealership page using the link below:
   table.btn.btn-primary(role="presentation")
     tbody

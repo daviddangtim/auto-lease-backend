@@ -36,7 +36,7 @@ const seedAdmin = async () => {
         password: answers.password,
         passwordConfirm: answers.passwordConfirm,
         role: answers.role,
-        isUserConfirmed: true,
+        isVerified: true,
       });
 
       await admin.save();

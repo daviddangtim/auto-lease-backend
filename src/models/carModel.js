@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
-import { limitArrayLength } from "../utils/utils.js";
+import { limitArrayLength } from "../utils/helpers.js";
 import pointSchema from "./pointSchema.js";
 
 const carSchema = new mongoose.Schema(
@@ -64,10 +64,30 @@ const carSchema = new mongoose.Schema(
       maxlength: [150, "Summary cannot be more than 150 characters"],
       minLength: [50, "Summary cannot be less than 50 characters"],
     },
+    ratingsQuantity: {
+      type: Number,
+      default: 0,
+      min: [0, "Ratings quantity cannot be less than 0"],
+    },
+    ratingsAverage: {
+      type: Number,
+      default: 0,
+      min: [0, "Ratings Average cannot be less than 0"],
+      max: [5, "Ratings average cannot be more than 5"],
+    },
     slug: String,
     duration: {
       type: Date,
       required: [true, "A car must have a lease duration"],
+    },
+
+    coverImage: {
+      type: String,
+      required: true,
+    },
+    coverImageId: {
+      type: String,
+      required: true,
     },
     photos: {
       type: [String],
@@ -121,6 +141,12 @@ const carSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+carSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "car",
+});
 
 carSchema.pre("save", function (next) {
   if (!this.isModified("slug")) {

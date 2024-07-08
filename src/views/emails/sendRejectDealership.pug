@@ -3,7 +3,9 @@ extends baseEmail
 block content
   p Hi #{ firstName },
   p We regret to inform you that your dealership application has been rejected.
-  p Reason:
+  p Reason :
+    |
     strong #{ reason }
-  p Please feel free to contact us for more information.
+  p Please feel free to contact us for more information or if you have any questions.
+  p You are welcome to apply again after addressing the noted reason(s).
   p - The Auto Lease Team

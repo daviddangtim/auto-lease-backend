@@ -5,13 +5,10 @@ const router = express.Router();
 
 router.post("/sign-up", authController.signUp);
 router.post("/sign-in", authController.signIn);
-router.patch("/sign-in/2fa-verify", authController.verify);
-router.patch("/confirm-user/:token", authController.confirmUser);
+router.patch("/2fa", authController.signIn2fa);
+router.patch("/verify/:token", authController.verifyUser);
 router.patch("/forgot-password", authController.forgotPassword);
 router.patch("/reset-password/:token", authController.resetPassword);
-router.patch(
-  "/request-confirmation-token",
-  authController.requestConfirmationToken,
-);
+router.patch("/request/token", authController.requestConfirmationToken);
 
 export default router;

@@ -38,16 +38,11 @@ export const dealershipSchema = new mongoose.Schema(
       maxlength: [150, "Summary cannot be more than 150 characters"],
       minLength: [50, "Summary cannot be less than 50 characters"],
     },
-    ratingsQuantity: {
+    reputation: {
       type: Number,
       default: 0,
-      min: [0, "Ratings quantity cannot be less than 0"],
-    },
-    ratingsAverage: {
-      type: Number,
-      default: 0,
-      min: [0, "Ratings Average cannot be less than 0"],
-      max: [5, "Ratings average cannot be more than 5"],
+      max: [100, "A dealership reputation cannot be more than 100%"],
+      min: [0, "A dealership reputation cannot be less than 0%"],
     },
     startLocation: {
       type: pointSchema,
@@ -62,14 +57,8 @@ export const dealershipSchema = new mongoose.Schema(
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "A dealership must have a owner"],
+      required: [true, "A dealership must have an owner"],
     },
-    cars: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Car",
-      },
-    ],
     deliveryAgent: [
       {
         type: mongoose.Schema.ObjectId,
@@ -78,15 +67,13 @@ export const dealershipSchema = new mongoose.Schema(
     ],
     isApproved: {
       type: Boolean,
-      select: false,
-    },
-    isRejected: {
-      type: Boolean,
+      default: false,
       select: false,
     },
     isActive: {
       type: Boolean,
       default: true,
+      select: false,
     },
     locations: [pointSchema],
     slug: String,
@@ -98,10 +85,10 @@ export const dealershipSchema = new mongoose.Schema(
   },
 );
 
-dealershipSchema.virtual("reviews", {
-  ref: "Review",
-  foreignField: "dealership",
+dealershipSchema.virtual("cars", {
+  ref: "Car",
   localField: "_id",
+  foreignField: "dealership",
 });
 
 dealershipSchema.pre("save", function (next) {
@@ -111,7 +98,11 @@ dealershipSchema.pre("save", function (next) {
   next();
 });
 
-dealershipSchema.pre(/^find/, function (next) {
+dealershipSchema.pre(/^find/, async function (next) {
+  if (!this.options.bypass) {
+    this.find({ isApproved: true });
+  }
+
   this.populate({
     path: "owner",
     select: "name photo _id",
@@ -119,8 +110,14 @@ dealershipSchema.pre(/^find/, function (next) {
 
   this.populate({
     path: "cars",
-    select: "name",
+    select: "name photos _id",
   });
+
+  this.populate({
+    path: "deliveryAgent",
+    select: "name photo _id",
+  });
+
   next();
 });
 

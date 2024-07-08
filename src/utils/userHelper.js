@@ -3,8 +3,7 @@ import {
   createHash,
   createRandomBytes,
   createTimeStampInEpoch,
-  generateOtp,
-} from "./utils.js";
+} from "./helpers.js";
 
 export const passwordChangedAfterJwt = function (jwtIat, passwordChangedAt) {
   if (passwordChangedAt) {
@@ -16,51 +15,27 @@ export const passwordChangedAfterJwt = function (jwtIat, passwordChangedAt) {
 export const comparePassword = async (password, hashedPassword) =>
   await bcrypt.compare(password, hashedPassword);
 
-export const generateAndSaveOtp = async (user) => {
-  const otp = generateOtp(6);
-  user.otp = createHash(otp);
-  user.otpExpires = createTimeStampInEpoch({ m: 2 });
-  await user.save({ validateBeforeSave: false });
-  return otp;
-};
-
 export const destroyOtpAndSave = async (user) => {
   user.otp = undefined;
   user.otpExpires = undefined;
   await user.save({ validateBeforeSave: false });
 };
 
-export const generateAndSavePasswordResetToken = async (user) => {
-  const token = await createRandomBytes(32);
-  user.passwordResetToken = createHash(token);
-  user.passwordResetTokenExpires = createTimeStampInEpoch({ m: 10 });
-  await user.save({ validateBeforeSave: false });
-  return token;
-};
-
-export const destroyPasswordResetTokenAndSave = async (user) => {
+export const destroyPasswordReset = async (user) => {
   user.passwordResetToken = undefined;
   user.passwordResetTokenExpires = undefined;
-  await user.save({ validateBeforeSave: false });
 };
 
-export const confirmUserAndSave = async (user) => {
-  user.isUserConfirmed = true;
-  user.userConfirmationToken = undefined;
-  user.userConfirmationTokenExpires = undefined;
-  await user.save({ validateBeforeSave: false });
-};
-
-export const generateAndSaveUserConfirmationToken = async (user) => {
+export const generateAndSaveVerificationToken = async (user) => {
   const token = await createRandomBytes(32);
-  user.userConfirmationToken = createHash(token);
-  user.userConfirmationTokenExpires = createTimeStampInEpoch({ m: 10 });
+  user.verificationToken = createHash(token);
+  user.verificationTokenExpires = createTimeStampInEpoch({ m: 10 });
   await user.save({ validateBeforeSave: false });
   return token;
 };
 
-export const destroyUserConfirmationTokenAndSave = async (user) => {
-  user.userConfirmationToken = undefined;
-  user.userConfirmationToken = undefined;
+export const destroyVerificationTokenAndSave = async (user) => {
+  user.verificationToken = undefined;
+  user.verificationTokenExpires = undefined;
   user.save({ validateBeforeSave: false });
 };

@@ -1,4 +1,4 @@
-import { catchAsync } from "../utils/utils.js";
+import { catchAsync } from "../utils/helpers.js";
 
 export const createUser = catchAsync(async (req, res, next) => {});
 export const getUser = catchAsync(async (req, res, next) => {});
