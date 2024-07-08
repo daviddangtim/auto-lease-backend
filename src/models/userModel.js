@@ -121,7 +121,6 @@ const userSchema = new mongoose.Schema(
     photo: String,
     photoId: String,
     location: pointSchema,
-    isUserConfirmed: Boolean,
   },
   { timestamps: true },
 );

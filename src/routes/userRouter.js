@@ -1,30 +1,21 @@
 import express from "express";
 import { protect, restrictTo } from "../middlewares/guard.js";
 import { ROLES } from "../utils/constants.js";
-import {
-  applyForDealership,
-  approveDealership,
-  deleteMe,
-  rejectDealership,
-  revokeDealership,
-  updateMe,
-  updateMyPassword,
-  updateProfilePhoto,
-} from "../controllers/userController.js";
+import * as controller from "../controllers/userController.js";
 
 const router = express.Router({ mergeParams: true });
 const { USER, ADMIN } = ROLES;
 
 router.use(protect);
 
-router.post("/apply", restrictTo(USER), applyForDealership);
-router.patch("/approve/:id", restrictTo(ADMIN), approveDealership);
-router.patch("/reject/:id", restrictTo(ADMIN), rejectDealership);
-router.patch("/revoke/:id", restrictTo(ADMIN), revokeDealership);
+router.post("/apply", restrictTo(USER), controller.applyForDealership);
+router.patch("/approve/:id", restrictTo(ADMIN), controller.approveDealership);
+router.patch("/reject/:id", restrictTo(ADMIN), controller.rejectDealership);
+router.patch("/revoke/:id", restrictTo(ADMIN), controller.revokeDealership);
 
-router.patch("/update/me", updateMe);
-router.patch("/delete/me", deleteMe);
-router.patch("/update-Password/me", updateMyPassword);
-router.patch("/update-photo/me", updateProfilePhoto);
+router.patch("/update/me", controller.updateMe);
+router.patch("/delete/me", controller.deleteMe);
+router.patch("/update-Password/me", controller.updateMyPassword);
+router.patch("/update-photo/me", controller.updateProfilePhoto);
 
 export default router;
