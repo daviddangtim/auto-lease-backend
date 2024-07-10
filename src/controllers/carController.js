@@ -7,36 +7,26 @@ import Dealership from "../models/dealershipModel.js";
 
 
 export const createCar = catchAsync(async (req, res, next) => {
-  const car = await new Car({
-    ...req.body,
+  const userId = req.user.id;
+  const dealership = await Dealership.findOne(
+      { car: { _id: userId } },
+      { _id: 1 },
+      { lean: true },
+  ).exec();
+  if (!dealership) {
+    return next(new AppError("No dealership found with this ID", 404));
+  }
+  const payload = filterObject(req.body, ["slug", "isAvailable"], {
+    exclude: true,
   });
-  const urls = [];
-  const files = req.files;
-  for (const file of files) {
-    const { path } = file;
-    const newPath = await cloudinaryImageUploader(path);
-    urls.push(newPath);
-  }
-  car.dealership = req.user._id;
-  const image = req.file.path;
-
-  const result = await cloudinary.uploader.upload(image);
-
-  // Not too sure what I'm doing here
-  car.photos.push(result.secure_url);
-  car.photosId.push(result.public_id);
-
-  if (!car) {
-    return next(new AppError("Unable to create car", 400));
-  }
-
-  await car.save();
+  payload.dealership = dealership._id;
+  payload.images = req.photos;
+  payload.imageIds = req.photosId;
+  const car = await Car.create(payload);
 
   res.status(201).json({
-    status: "success",
-    data: {
-      car,
-    },
+    statusText: "success",
+    data: { car },
   });
 });
 
@@ -66,7 +56,7 @@ export const createCarV1 = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getCarsV1 = catchAsync(async (req, res, next) => {
+export const getCars = catchAsync(async (req, res, next) => {
   const isAdmin = req.user?.role === ADMIN;
   let appQueries;
 
@@ -98,7 +88,7 @@ export const getCarsV1 = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getCarV1 = catchAsync(async (req, res, next) => {
+export const getCar = catchAsync(async (req, res, next) => {
   const car = await Car.findById(req.params.id);
 
   const isAdmin = req.user?.role === ADMIN;
@@ -121,7 +111,7 @@ export const getCarV1 = catchAsync(async (req, res, next) => {
 });
 
 // Dangtim
-export const updateCarV1 = catchAsync(async (req, res, next) => {
+export const updateCar = catchAsync(async (req, res, next) => {
   const payload = filterObject(req.body, [
     "slug",
     "dealership",
@@ -151,7 +141,3 @@ const car = await Car.findByIdAndDelete(req.params.id).exec();
 });
 
 
-export const getCars = catchAsync(async (req, res, next) => { });
-export const getCar = catchAsync(async (req, res, next) => { });
-export const updateCar = catchAsync(async (req, res, next) => { });
-export const deleteCar = catchAsync(async (req, res, next) => { });
