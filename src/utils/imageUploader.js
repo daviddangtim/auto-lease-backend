@@ -40,42 +40,82 @@ const upload = multer({
 });
 
 const uploadMultiple = async (req, res, next) => {
-    const images = req.files;
-    console.log(images);
-    const photos = [];
-    const photosId = [];
+    try {
+        const images = req.files;
+        console.log(images);
+        const photos = [];
+        const photosId = [];
 
-    for (const image of images) {
-        const result = await cloudinary.uploader.upload(image.path, {
-            folder: "auto-lease",
-            resource_type: "auto"
-        });
-        photos.push(result.secure_url);
-        photosId.push(result.public_id);
+        for (const image of images) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream({
+                    folder: "auto-lease",
+                    resource_type: "auto",
+                    use_filename: true
+                }, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                });
+                uploadStream.end(image.buffer);
+            });
+
+            photos.push(result.secure_url);
+            photosId.push(result.public_id);
+        }
+
+        req.photos = photos;
+        req.photosId = photosId;
+        console.log(photos, photosId);
+        next();
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('An error occurred while uploading files');
     }
+};
 
-    req.photos = photos;
-    req.photosId = photosId;
-    next();
-}
+// If anyone reading this is confused the buffer is just the buffer field in the field object since we're using memory storage to upload it
 
-
-const cloudinaryImageUploader = async (file) => {
-    return await cloudinary.uploader.upload(file, {
-        folder: "auto-lease",
+const cloudinaryImageUploader = async (buffer) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({
+            folder: "auto-lease"
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+        uploadStream.end(buffer);
     });
 };
 
-const cloudinaryImageUpdater = async (imageToUpdate, previousImageId) => {
-    await cloudinary.uploader.destroy(previousImageId, {
-        folder: "auto-lease",
-        resource_type: "auto",
-    });
+const cloudinaryImageUpdater = async (buffer, previousImageId) => {
+    try {
+        await cloudinary.uploader.destroy(previousImageId, {
+            folder: "auto-lease",
+            resource_type: "auto"
+        });
 
-    return await cloudinary.uploader.upload(imageToUpdate, {
-        folder: "auto-lease",
-        resource_type: "auto",
-    });
-}
+        return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream({
+                folder: "auto-lease",
+                resource_type: "auto"
+            }, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+            uploadStream.end(buffer);
+        });
+    } catch (error) {
+        throw error;
+    }
+};
 
 export {upload, cloudinary, cloudinaryImageUploader, cloudinaryImageUpdater, uploadMultiple};
