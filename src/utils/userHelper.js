@@ -39,3 +39,10 @@ export const destroyVerificationTokenAndSave = async (user) => {
   user.verificationTokenExpires = undefined;
   user.save({ validateBeforeSave: false });
 };
+
+export const destroySensitiveData = (user) => {
+  user.password = undefined;
+  user.verificationToken = undefined;
+  user.verificationTokenExpires = undefined;
+  user.isActive = undefined;
+};

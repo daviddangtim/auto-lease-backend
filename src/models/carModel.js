@@ -2,7 +2,9 @@ import mongoose from "mongoose";
 import slugify from "slugify";
 import { limitArrayLength } from "../utils/helpers.js";
 import pointSchema from "./pointSchema.js";
+import { CATEGORY } from "../utils/constants.js";
 
+const { BASIC, CLASSIC, LUXURY } = CATEGORY;
 const carSchema = new mongoose.Schema(
   {
     dealership: {
@@ -49,6 +51,14 @@ const carSchema = new mongoose.Schema(
         /^[A-Z]{3}-?\d{3}[A-Z]{2}$/,
         "Please enter a valid Nigerian plate number",
       ],
+    },
+
+    category: {
+      type: String,
+      enum: {
+        values: [BASIC, CLASSIC, LUXURY],
+        message: `Invalid category. Choose from: ${BASIC} and ${CLASSIC} and ${LUXURY}`,
+      },
     },
     description: {
       type: String,

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-import { DEALERSHIP_APPLICATION_STATUS, ROLES } from "../utils/constants.js";
+import { ApplicationStatus, ROLES } from "../utils/constants.js";
 import pointSchema from "./pointSchema.js";
 
-const { APPROVED, PENDING, REJECTED, REVOKED } = DEALERSHIP_APPLICATION_STATUS;
+const { APPROVED, PENDING, REJECTED, REVOKED } = ApplicationStatus;
 const { USER, DEALER, ADMIN, Driver } = ROLES;
 
 const userSchema = new mongoose.Schema(
@@ -105,25 +105,28 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-      select: false,
-    },
-    isVerified: {
-      type: Boolean,
-      select: false,
-    },
     driversLicense: {
       type: String,
       select: false,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     photo: String,
     photoId: String,
+    isVerified: Boolean,
     location: pointSchema,
   },
   { timestamps: true },
 );
+
+userSchema.pre(/^find/, function (next) {
+  if (!this.options.bypass) {
+    this.find({ isActive: { $ne: false } });
+  }
+  next();
+});
 
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
@@ -137,11 +140,6 @@ userSchema.pre("save", function (next) {
   if (!this.isNew && this.isModified("password")) {
     this.passwordChangedAt = Date.now() - 1000;
   }
-  next();
-});
-
-userSchema.pre(/^find/, function (next) {
-  this.find({ isActive: { $ne: false } });
   next();
 });
 

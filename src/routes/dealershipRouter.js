@@ -10,19 +10,17 @@ const { ADMIN, USER, DEALER } = ROLES;
 
 router.use("/users", protect, restrictTo(USER, ADMIN), userRouter);
 
-router.get("/public", dealershipController.getAllDealerships);
-router.get("/public/:id", dealershipController.getDealership);
-
-router.use(protect);
-
 router
   .route("/")
-  .get(restrictTo(ADMIN), dealershipController.getAllDealerships);
+  .get(dealershipController.getAllDealerships)
+  .post(protect, restrictTo(ADMIN), dealershipController.createDealership);
 
 router
   .route("/:id")
-  .post(restrictTo(ADMIN), dealershipController.createDealership)
-  .get(restrictTo(ADMIN, DEALER), dealershipController.getDealership);
+  .post(protect, restrictTo(ADMIN), dealershipController.createDealership)
+  .get(dealershipController.getDealership);
+
+router.use(protect);
 
 router.patch(
   "/update/me",

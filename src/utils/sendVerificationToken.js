@@ -7,43 +7,50 @@ import {
   generateAndSaveVerificationToken,
 } from "./userHelper.js";
 
-const sendVerificationToken = async (user, options = {}) => {
-  const token = await generateAndSaveVerificationToken(user);
-  const url = `${BASE_URL}/auth/verify/${token}`;
+export default class SendVerificationToken {
+  constructor(user) {
+    this.user = user;
+  }
 
-  if (options.notVerified) {
-    await new Email(user, { url }).sendVerification();
+  async init() {
+    this.token = await generateAndSaveVerificationToken(this.user);
+    this.url = `${BASE_URL}/auth/verify/${this.token}`;
+    this.successMsg =
+      "verification email sent! Please check your inbox to verify your account.";
+    this.failMsg =
+      "An error occurred while sending the verification email. Please try again later.";
+  }
+
+  async sendEmail() {
+    try {
+      await new Email(this.user, { url: this.url }).sendVerification();
+    } catch (err) {
+      isProduction && console.log(err);
+      await destroyVerificationTokenAndSave(this.user);
+      throw new AppError(this.failMsg, 500);
+    }
+  }
+
+  async creationSender() {
+    await this.init();
+    await this.sendEmail();
+    return {
+      message: this.successMsg,
+      token: isProduction ? undefined : this.token,
+    };
+  }
+
+  async notVerifiedButTrySignInSender() {
+    await this.sendEmail();
     throw new AppError(
       "Your account is not verified. Please check your inbox to verify your account.",
       401,
     );
   }
 
-  try {
-    await new Email(user, { url }).sendVerification();
-    return {
-      message:
-        "verification email sent! Please check your inbox to verify your account.",
-      token: isProduction ? undefined : token,
-    };
-  } catch (err) {
-    await destroyVerificationTokenAndSave(user);
-
-    if (options.create) {
-      return {
-        message: isProduction
-          ? "Your account has been created successfully, but we couldn't send the verification email. Please request a new verification token."
-          : `Your account has been created successfully, but there was an error sending the verification email: ${err.message}. Please request a new verification token.`,
-      };
-    } else {
-      throw new AppError(
-        isProduction
-          ? "An error occurred while sending the verification email. Please try again later."
-          : `Error sending verification email: ${err.message}`,
-        500,
-      );
-    }
+  async verificationSender() {
+    await this.init();
+    await this.sendEmail();
+    return { message: this.successMsg };
   }
-};
-
-export default sendVerificationToken;
+}

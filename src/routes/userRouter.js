@@ -9,13 +9,28 @@ const { USER, ADMIN } = ROLES;
 router.use(protect);
 
 router.post("/apply", restrictTo(USER), controller.applyForDealership);
-router.patch("/approve/:id", restrictTo(ADMIN), controller.approveDealership);
-router.patch("/reject/:id", restrictTo(ADMIN), controller.rejectDealership);
-router.patch("/revoke/:id", restrictTo(ADMIN), controller.revokeDealership);
 
 router.patch("/update/me", controller.updateMe);
 router.patch("/delete/me", controller.deleteMe);
+
 router.patch("/update-Password/me", controller.updateMyPassword);
 router.patch("/update-photo/me", controller.updateProfilePhoto);
+
+router.use(restrictTo(ADMIN));
+
+router
+  .route("/")
+  .post(controller.createUser)
+  .get(controller.getAllUsers)
+  .delete(controller.deleteManyUsers);
+router
+  .route("/:id")
+  .get(controller.getUser)
+  .delete(controller.deleteUser)
+  .patch(controller.updateUser);
+
+router.patch("/approve/:id", controller.approveDealership);
+router.patch("/reject/:id", controller.rejectDealership);
+router.patch("/revoke/:id", controller.revokeDealership);
 
 export default router;
