@@ -1,6 +1,6 @@
 import AppError from "../utils/appError.js";
-import AppQueries from "../utils/appQueries.js";
 import Email from "../utils/email.js";
+import * as factory from "../services/serviceFactory.js";
 import Dealership from "../models/dealershipModel.js";
 import User from "../models/userModel.js";
 import { ROLES } from "../utils/constants.js";
@@ -46,8 +46,7 @@ export const createDealership = async (reqBody, userId, options = {}) => {
           "slug",
           "isApproved",
           "owner",
-          "ratingsAverage",
-          "ratingsQuantity",
+          "reputation",
           "dealershipLicence",
           "cacCertificate",
         ]
@@ -64,115 +63,42 @@ export const createDealership = async (reqBody, userId, options = {}) => {
     try {
       user.role = DEALER;
       user.applicationStatus = undefined; // in case this user has applied
-      await new Email(user, { createdByAdmin: true }).sendApprovedDealership();
+
+      await user.save({ validateBeforeSave: false });
+
+      try {
+        await new Email(user, {
+          createdByAdmin: true,
+        }).sendApprovedDealership();
+      } catch (err) {
+        isProduction && console.log(err);
+      }
     } catch (err) {
       user.role = USER;
       await user.save({ validateBeforeSave: false });
-
       await Dealership.findOneAndDelete({ owner: user.id }, { lean: true })
         .setOptions({ bypass: true })
         .exec();
 
-      throw new AppError(
-        "Failed to send email. Dealership creation has been reverted.",
-        500,
-      );
+      throw new AppError("There was an error creating the dealership.", 500);
     }
   }
 
   return { dealership, user };
 };
 
-export const getDealership = async (dealershipId, options = {}) => {
-  const { secured } = options;
-  let dealership;
+export const getDealership = async (dealershipId) =>
+  await factory.getOneById(Dealership, dealershipId);
 
-  if (secured) {
-    dealership = await Dealership.findById(dealershipId, {}, { lean: true })
-      .select("+dealershipLicence +cacCertificate +isApproved")
-      .exec();
-  } else {
-    dealership = await Dealership.findById(
-      dealershipId,
-      {},
-      { lean: true },
-    ).exec();
-  }
+export const getAllDealerships = async (query) =>
+  await factory.getMany(Dealership, query);
 
-  if (!dealership) {
-    throw new AppError("Dealership not found", 404);
-  }
+export const deleteDealership = async (dealershipId) =>
+  await factory.deleteById(Dealership, dealershipId);
 
-  return { dealership };
-};
-
-export const getAllDealerships = async (isAdmin, query) => {
-  let appQueries;
-
-  if (isAdmin) {
-    appQueries = new AppQueries(query, Dealership.find({}))
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-  } else {
-    appQueries = new AppQueries(query, Dealership.find({}, {}, { lean: true }))
-      .filter()
-      .sort()
-      .paginate();
-  }
-
-  const dealerships = await appQueries.query
-    .setOptions({ bypass: false })
-    .exec();
-
-  return { dealerships };
-};
-
-export const updateDealership = async (reqBody, userId) => {
-  const payload = filterObject(
-    reqBody,
-    ["slug", "isApproved", "owner", "dealershipLicence", "cacCertificate"],
-    { exclude: true },
-  );
-
-  const updatedDealership = await Dealership.findByIdAndUpdate(
+export const updateDealership = async (reqBody, userId) =>
+  factory.updateById(
+    Dealership,
     userId,
-    payload,
-    {
-      includeResultMetadata: true,
-      new: true,
-      lean: true,
-    },
-  ).exec();
-
-  if (!updatedDealership) {
-    throw new AppError("No dealership associated with this user", 404);
-  }
-
-  return { updatedDealership };
-};
-
-export const updateDealershipCerts = async (reqBody, user) => {
-  const payload = filterObject(reqBody, [
-    "cacCertificate",
-    "dealershipLicence",
-    "password",
-  ]);
-
-  if (!payload.password) {
-    throw new AppError("Password is required to carry out this operation", 403);
-  }
-
-  if (!(await comparePassword(payload.password, user.password))) {
-    throw new AppError("Password is incorrect", 403);
-  }
-
-  const updatedDealership = await Dealership.findOneAndUpdate(
-    { owner: user.id },
-    payload,
-    { new: true, lean: true, includeResultMetadata: true },
-  ).exec();
-
-  return { updatedDealership };
-};
+    filterObject(reqBody, ["slug", "isApproved", "owner"], { exclude: true }),
+  );

@@ -1,18 +1,50 @@
-import {
-  BASE_URL,
-  DEALERSHIP_APPLICATION_STATUS,
-  ROLES,
-} from "../utils/constants.js";
 import AppError from "../utils/appError.js";
-import { createDealership } from "./dealershipService.js";
 import Email from "../utils/email.js";
-import Dealership from "../models/dealershipModel.js";
-import { isProduction } from "../utils/helpers.js";
-import User from "../models/userModel.js";
+import { createDealership } from "./dealershipService.js";
 import { comparePassword } from "../utils/userHelper.js";
+import { filterObject, isProduction } from "../utils/helpers.js";
+import * as factory from "./serviceFactory.js";
+import * as constants from "../utils/constants.js";
+import User from "../models/userModel.js";
+import Dealership from "../models/dealershipModel.js";
 
-const { PENDING, REVOKED, REJECTED, APPROVED } = DEALERSHIP_APPLICATION_STATUS;
-const { DEALER, USER } = ROLES;
+const { PENDING, REVOKED, REJECTED, APPROVED } = constants.ApplicationStatus;
+const { DEALER, USER, ADMIN } = constants.ROLES;
+
+export const getUser = async (userId) =>
+  factory.getOneById(User, userId, (q) => q.lean());
+
+export const getAllUsers = async (query) =>
+  factory.getMany(User, query, { sensitive: true }, (q) => q.lean());
+
+export const updateUser = async (reqBody, userId) =>
+  factory.updateById(
+    User,
+    userId,
+    filterObject(reqBody, ["password", "passwordConfirm"], { exclude: true }),
+  );
+
+export const deleteUser = async (userId) =>
+  await factory.deleteById(User, userId);
+
+export const deleteManyUser = async () => {
+  const { matchedCount, modifiedCount, acknowledged } = await User.updateMany(
+    { role: { $ne: ADMIN } },
+    { $set: { isActive: false } },
+  ).exec();
+
+  if (!acknowledged) {
+    throw new AppError("Failed to update users", 500);
+  }
+
+  return {
+    matchedCount,
+    modifiedCount,
+    acknowledged,
+  };
+};
+export const deleteManyUsers = async (filter) =>
+  factory.deleteMany(User, filter);
 
 export const updateMyPassword = async (user, reqBody) => {
   const { currentPassword, password, passwordConfirm } = reqBody;
@@ -26,6 +58,40 @@ export const updateMyPassword = async (user, reqBody) => {
   await user.save();
 
   return { user };
+};
+
+export const updateMe = async (reqBody, userId) => {
+  if (reqBody.password) {
+    throw new AppError(
+      "Password updates are not allowed from this route. Please use the /users/update-password endpoint.",
+      403,
+    );
+  }
+
+  const payload = filterObject(reqBody, ["email", "name", "Photo"]);
+
+  const user = await User.findByIdAndUpdate(userId, payload, {
+    includeResultMetadata: true,
+    lean: true,
+    new: true,
+  }).exec();
+
+  return { user };
+};
+
+export const deleteMe = async (user, password) => {
+  if (!password) {
+    throw new AppError("Password is required to carry out this operation", 403);
+  }
+  if (!(await comparePassword(password, user.password))) {
+    throw new AppError(
+      "The password you entered is incorrect. Please try again.",
+      403,
+    );
+  }
+
+  user.isActive = false;
+  await user.save({ validateBeforeSave: false });
 };
 
 export const applyForDealership = async (reqBody, user) => {
@@ -51,7 +117,7 @@ export const applyForDealership = async (reqBody, user) => {
     try {
       await new Email(user).sendApplyDealership();
     } catch (err) {
-      console.error("Failed to send email:", err);
+      isProduction && console.error("Failed to send email:", err);
     }
 
     return {
@@ -65,11 +131,12 @@ export const applyForDealership = async (reqBody, user) => {
     await user.save({ validateBeforeSave: false });
 
     // Deleting the dealership if it was created
-    await Dealership.findByIdAndDelete(
+    await Dealership.findOneAndDelete(
       { owner: user.id },
       { lean: true },
     ).exec();
 
+    await factory.deleteById();
     throw new AppError(
       isProduction
         ? "An error occurred while submitting your dealership application. Please try again."
@@ -88,6 +155,10 @@ export const approveDealership = async (userId) => {
 
   if (user.applicationStatus === REJECTED) {
     throw new AppError("User's application was rejected", 403);
+  }
+
+  if (user.applicationStatus === REVOKED) {
+    throw new AppError("User's dealership status has been revoked");
   }
 
   if (user.applicationStatus === "approved") {
@@ -115,7 +186,9 @@ export const approveDealership = async (userId) => {
     ]);
 
     try {
-      await new Email(user, { url: `${BASE_URL}/` }).sendApprovedDealership();
+      await new Email(user, {
+        url: `${constants.BASE_URL}/`,
+      }).sendApprovedDealership();
     } catch (err) {
       console.log(`There was an error sending the mail: ${err}`);
     }

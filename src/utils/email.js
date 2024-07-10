@@ -47,7 +47,7 @@ export default class Email {
 
   async sendVerification(minutes = 10) {
     await this.send(
-      "verificationEmail",
+      "sendVerificationEmail",
       `Confirm your email (valid for only ${minutes} minutes)`,
     );
   }

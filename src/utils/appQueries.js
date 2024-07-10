@@ -1,3 +1,5 @@
+import { parseMongoQuery } from "./helpers.js";
+
 export default class AppQueries {
   constructor(queryObject, query) {
     this.queryObject = queryObject;
@@ -9,14 +11,7 @@ export default class AppQueries {
     const excluded = ["page", "limit", "sort", "fields"];
     excluded.forEach((el) => delete cQueryObject[el]);
 
-    this.query = this.query.find(
-      JSON.parse(
-        JSON.stringify(cQueryObject).replace(
-          /\b(gte|gt|lte|lt|in|ne|eq)\b/g,
-          (match) => `$${match}`,
-        ),
-      ),
-    );
+    this.query = this.query.find(parseMongoQuery(cQueryObject));
     return this;
   }
 

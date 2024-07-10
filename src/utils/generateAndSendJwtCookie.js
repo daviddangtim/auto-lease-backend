@@ -1,7 +1,8 @@
 import { sign } from "./jwt.js";
 import { createTimeStampInEpoch } from "./helpers.js";
+import { destroySensitiveData } from "./userHelper.js";
 
-const generateAndSendJwtCookie = async (user, res) => {
+const generateAndSendJwtCookie = async (res, user, statusCode = 200, msg) => {
   const token = await sign(user.id);
   const expires = new Date(
     createTimeStampInEpoch(JSON.parse(process.env.JWT_COOKIE_EXPIRES_IN)),
@@ -13,9 +14,12 @@ const generateAndSendJwtCookie = async (user, res) => {
     httpOnly: true,
   });
 
-  res.status(200).json({
+  destroySensitiveData(user);
+
+  res.status(statusCode).json({
     token: token,
     statusText: "success",
+    message: msg,
     data: { user },
   });
 };

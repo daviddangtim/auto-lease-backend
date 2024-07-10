@@ -3,8 +3,7 @@ import Car from "../models/carModel.js";
 import { cloudinary, cloudinaryImageUploader } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";
 import Dealership from "../models/dealershipModel.js";
-
-
+import AppQueries from "../utils/appQueries.js";
 
 export const createCar = catchAsync(async (req, res, next) => {
   const car = await new Car({
@@ -71,19 +70,13 @@ export const getCarsV1 = catchAsync(async (req, res, next) => {
   let appQueries;
 
   if (isAdmin) {
-    appQueries = new AppQueries(
-      req.query,
-      Car.find({}, {}, { lean: true }),
-    )
+    appQueries = new AppQueries(req.query, Car.find({}, {}, { lean: true }))
       .filter()
       .sort()
       .limitFields()
       .paginate();
   } else {
-    appQueries = new AppQueries(
-      req.query,
-      Car.find({}, {}, { lean: true })
-    )
+    appQueries = new AppQueries(req.query, Car.find({}, {}, { lean: true }))
       .filter()
       .sort()
       .paginate();
@@ -122,36 +115,36 @@ export const getCarV1 = catchAsync(async (req, res, next) => {
 
 // Dangtim
 export const updateCarV1 = catchAsync(async (req, res, next) => {
-  const payload = filterObject(req.body, [
-    "slug",
-    "dealership",
-    "isAvailable"
-  ], { exclude: true });
+  const payload = filterObject(
+    req.body,
+    ["slug", "dealership", "isAvailable"],
+    { exclude: true },
+  );
 
-  const updateCar = await Car.findByIdAndUpdate({ dealership: req.user.id },
+  const updateCar = await Car.findByIdAndUpdate(
+    { dealership: req.user.id },
     payload,
     { includeResultMetadata: true, lean: true, new: true },
   ).exec();
 
   if (!updateCar) {
     return next(
-      new AppError("No Car associated with this dealership was found", 404)
+      new AppError("No Car associated with this dealership was found", 404),
     );
   }
 
   res.status(200).json({
     statusText: "success",
-    data: { updateCar }
-  })
+    data: { updateCar },
+  });
 });
 
-const deleteCarV1 = catchAsync(async (req,res,next)=>{
-const car = await Car.findByIdAndDelete(req.params.id).exec();
-// TODO: Add more flesh to the delete function 
+const deleteCarV1 = catchAsync(async (req, res, next) => {
+  const car = await Car.findByIdAndDelete(req.params.id).exec();
+  // TODO: Add more flesh to the delete function
 });
 
-
-export const getCars = catchAsync(async (req, res, next) => { });
-export const getCar = catchAsync(async (req, res, next) => { });
-export const updateCar = catchAsync(async (req, res, next) => { });
-export const deleteCar = catchAsync(async (req, res, next) => { });
+export const getCars = catchAsync(async (req, res, next) => {});
+export const getCar = catchAsync(async (req, res, next) => {});
+export const updateCar = catchAsync(async (req, res, next) => {});
+export const deleteCar = catchAsync(async (req, res, next) => {});

@@ -1,7 +1,96 @@
-import { catchAsync } from "../utils/helpers.js";
 import AppError from "../utils/appError.js";
 import { cloudinary } from "../utils/imageUploader.js";
-import * as userService from "../services/userService.js";
+import { catchAsync } from "../utils/helpers.js";
+import * as service from "../services/userService.js";
+import * as factory from "./handlerFactory.js";
+
+export const createUser = catchAsync(async (req, res, next) => {
+  return next(
+    new AppError(
+      "This route is not yet defined! Please use /auth/sign-up",
+      500,
+    ),
+  );
+});
+
+export const getUser = factory.getOneById(service.getUser);
+
+export const updateUser = factory.updateById(service.updateUser);
+
+export const deleteUser = factory.deleteById(service.deleteUser);
+
+export const getAllUsers = factory.getMany(service.getAllUsers);
+
+export const deleteManyUsers = factory.deleteMany(service.deleteManyUsers);
+
+export const updateMyPassword = catchAsync(async (req, res) => {
+  const { user } = await service.updateMyPassword(user, req.body);
+
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
+});
+
+export const updateMe = catchAsync(async (req, res) => {
+  const { user } = await service.updateMe(req.body, req.user.id);
+
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
+});
+
+export const deleteMe = catchAsync(async (req, res) => {
+  await service.deleteMe(req.user, req.body.password);
+
+  res.status(204).json({
+    statusText: "success",
+    message: "Your account has been successfully deleted",
+  });
+});
+
+export const applyForDealership = catchAsync(async (req, res) => {
+  const { message } = await service.applyForDealership(req.body, req.user);
+
+  res.status(200).json({
+    statusText: "success",
+    message,
+  });
+});
+
+export const approveDealership = catchAsync(async (req, res) => {
+  const { user } = await service.approveDealership(req.params.id);
+
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
+});
+
+export const rejectDealership = catchAsync(async (req, res) => {
+  const { user } = await service.rejectDealership(
+    req.params.id,
+    req.body.reason,
+  );
+
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
+});
+
+export const revokeDealership = catchAsync(async (req, res) => {
+  const { user } = await service.revokeDealership(
+    req.params.id,
+    req.body.reason,
+  );
+
+  res.status(200).json({
+    statusText: "success",
+    data: { user },
+  });
+});
 
 export const updateProfilePhoto = catchAsync(async (req, res, next) => {
   const { image } = req.file;
@@ -23,86 +112,5 @@ export const updateProfilePhoto = catchAsync(async (req, res, next) => {
     data: {
       user,
     },
-  });
-});
-
-export const updateMyPassword = catchAsync(async (req, res) => {
-  const { user } = await userService.updateMyPassword(user, req.body);
-
-  res.status(200).json({
-    statusText: "success",
-    data: { user },
-  });
-});
-
-export const updateMe = catchAsync(async (req, res) => {
-  const updates = {};
-
-  if (req.body.name) {
-    updates.name = req.body.name;
-  }
-
-  if (req.body.email) {
-    updates.email = req.body.email;
-  }
-
-  const user = findByIdAndUpdate(req.user._id, { $set: { updates } });
-  if (user.nModified === 0) {
-    return res
-      .status(404)
-      .json({ message: "Unable to update fields because they were not found" });
-  }
-
-  await user.save();
-  res.status(200).json({ message: "Details Updated Successfully" });
-});
-
-export const deleteMe = catchAsync(async (req, res, next) => {
-  const user = findByIdAndDelete(req.user._id);
-
-  await user.save();
-
-  res.status(200).json({ message: "User deleted " });
-});
-
-export const applyForDealership = catchAsync(async (req, res) => {
-  const { message } = await userService.applyForDealership(req.body, req.user);
-
-  res.status(200).json({
-    statusText: "success",
-    message,
-  });
-});
-
-export const approveDealership = catchAsync(async (req, res) => {
-  const { user } = await userService.approveDealership(req.params.id);
-
-  res.status(200).json({
-    statusText: "success",
-    data: { user },
-  });
-});
-
-export const rejectDealership = catchAsync(async (req, res) => {
-  const { user } = await userService.rejectDealership(
-    req.params.id,
-    req.body.reason,
-  );
-
-  res.status(200).json({
-    statusText: "success",
-    data: { user },
-  });
-});
-
-export const revokeDealership = catchAsync(async (req, res) => {
-  const { user } = await userService.revokeDealership(
-    req.params.id,
-    req.body.reason,
-  );
-
-  res.status(200).json({
-    statusText: "success",
-    data: { user },
   });
 });

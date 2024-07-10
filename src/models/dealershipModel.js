@@ -65,16 +65,7 @@ export const dealershipSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    isApproved: {
-      type: Boolean,
-      default: false,
-      select: false,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-      select: false,
-    },
+    isApproved: Boolean,
     locations: [pointSchema],
     slug: String,
   },

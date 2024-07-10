@@ -14,9 +14,9 @@ export const createHash = (data) =>
 export const createRandomBytes = async (len) =>
   (await promisify(crypto.randomBytes)(len)).toString("hex");
 
-export const filterObject = (object, keys, { exclude = false } = {}) =>
+export const filterObject = (object, keys, options = {}) =>
   Object.keys(object).reduce((acc, key) => {
-    if (exclude) {
+    if (options.exclude) {
       if (!keys.includes(key)) {
         acc[key] = object[key];
       }
@@ -35,6 +35,14 @@ export const generateOtp = (len) => {
   }
   return otp;
 };
+
+export const parseMongoQuery = (query) =>
+  JSON.parse(
+    JSON.stringify(query).replace(
+      /\b(gte|gt|lte|lt|in|ne|eq)\b/g,
+      (match) => `$${match}`,
+    ),
+  );
 
 export const limitArrayLength =
   (max = 0, min = 0) =>

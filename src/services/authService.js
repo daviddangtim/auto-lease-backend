@@ -1,6 +1,6 @@
 import AppError from "../utils/appError.js";
 import Email from "../utils/email.js";
-import sendVerificationToken from "../utils/sendVerificationToken.js";
+import SendVerificationToken from "../utils/sendVerificationToken.js";
 import User from "../models/userModel.js";
 import { BASE_URL } from "../utils/constants.js";
 import {
@@ -26,15 +26,16 @@ export const signUp = async (req) => {
   ]);
 
   const user = await User.create(payload);
-  const result = await sendVerificationToken(user, { create: true });
+  const { message } = await new SendVerificationToken(user).creationSender();
 
   return {
-    message: result.message,
+    message,
+    user,
   };
 };
 
 export const requestVerification = async (req) => {
-  const { email } = req.body;
+  const email = req.body.email || req.user?.email;
 
   if (!email) {
     throw new AppError(
@@ -53,12 +54,12 @@ export const requestVerification = async (req) => {
     throw new AppError("You are already a verified user.", 409);
   }
 
-  const result = await sendVerificationToken(user);
+  const { message } = await new SendVerificationToken(
+    user,
+  ).verificationSender();
 
   return {
-    message: result.message,
-
-    token: result.token,
+    message,
   };
 };
 
@@ -116,9 +117,9 @@ export const signIn = async (password, email) => {
     throw new AppError("Incorrect password or email.", 401);
   }
 
-  if (!user.isVerified) {
-    await sendVerificationToken(user, { notVerified: true });
-  }
+  // if (!user.isVerified) {
+  //   await new SendVerificationToken(user).notVerifiedButTrySignInSender();
+  // }
 
   const otp = generateOtp(6);
   user.otp = createHash(otp);
@@ -185,7 +186,6 @@ export const forgotPassword = async (email) => {
     await new Email(user, { url }).sendPasswordReset();
 
     return {
-      statusText: "success",
       message: `Please check the email address ${email} for instructions to reset your password.`,
     };
   } catch (err) {
@@ -237,7 +237,6 @@ export const resetPassword = async (token, password, passwordConfirm) => {
   await user.save();
 
   return {
-    statusText: "success",
     message: "Password reset successful. Please log in with your new password.",
   };
 };
