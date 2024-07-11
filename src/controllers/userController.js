@@ -4,6 +4,16 @@ import { catchAsync } from "../utils/helpers.js";
 import * as service from "../services/userService.js";
 import * as factory from "./handlerFactory.js";
 
+export const getUser = factory.getById(service.getUser);
+
+export const updateUser = factory.updateById(service.updateUser);
+
+export const deleteUser = factory.deleteById(service.deleteUser);
+
+export const getAllUsers = factory.getAll(service.getAllUsers);
+
+export const deleteManyUsers = factory.deleteMany(service.deleteManyUsers);
+
 export const createUser = catchAsync(async (req, res, next) => {
   return next(
     new AppError(
@@ -13,15 +23,12 @@ export const createUser = catchAsync(async (req, res, next) => {
   );
 });
 
-export const getUser = factory.getOneById(service.getUser);
-
-export const updateUser = factory.updateById(service.updateUser);
-
-export const deleteUser = factory.deleteById(service.deleteUser);
-
-export const getAllUsers = factory.getMany(service.getAllUsers);
-
-export const deleteManyUsers = factory.deleteMany(service.deleteManyUsers);
+export const getMe = (req, res) => {
+  res.status(200).json({
+    statusText: "success",
+    data: { user: req.user },
+  });
+};
 
 export const updateMyPassword = catchAsync(async (req, res) => {
   const { user } = await service.updateMyPassword(user, req.body);

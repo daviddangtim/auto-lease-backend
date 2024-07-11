@@ -1,80 +1,22 @@
-import AppError from "../utils/appError.js";
-import AppQueries from "../utils/appQueries.js";
-import { catchAsync, filterObject } from "../utils/helpers.js";
-import Review from "../models/reviewModel.js";
-import Dealership from "../models/dealershipModel.js";
+import * as factory from "../controllers/handlerFactory.js";
+import * as service from "../services/reviewService.js";
 
-export const createReview = catchAsync(async (req, res, next) => {
-  const payload = filterObject(req.body, ["isUpdated"], { exclude: true });
-  payload.user = req.user?._id;
+export const setCarUserIds = (req, res, next) => {
+  if (!req.body.car) req.body.car = req.params.id;
+  if (!req.body.user) req.body.user = req.user.id;
 
-  const dealership = await Dealership.findById(
-    payload.dealership,
-    {},
-    { lean: true },
-  ).exec();
+  next();
+};
 
-  if (!dealership) {
-    return next(new AppError("Dealership not found", 404));
-  }
+export const createReview = factory.createOne(service.createReview);
 
-  if (String(payload.user) === String(dealership.owner._id)) {
-    return next(
-      new AppError("Dealers cannot review their own dealership", 403),
-    );
-  }
-  const review = await Review.create(payload);
+export const getReview = factory.getById(service.getReview);
 
-  res.status(201).json({
-    statusText: "success",
-    data: { review },
-  });
-});
+export const updateReview = factory.updateById(service.updateReview);
 
-export const getReview = catchAsync(async (req, res, next) => {
-  const review = await Review.findById(req.params.id).exec();
+export const deleteReview = factory.deleteById(service.deleteReview);
 
-  if (!review) {
-    return next(new AppError("No review found with this ID", 404));
-  }
-
-  res.status(200).json({
-    statusText: "success",
-    data: { review },
-  });
-});
-
-export const getAllReviews = catchAsync(async (req, res, next) => {
-  const reviews = await new AppQueries(req.query, Review.find())
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate()
-    .query.exec();
-
-  res.status(200).json({
-    statusText: "success",
-    numResult: reviews.length,
-    data: { reviews },
-  });
-});
-
-export const updateMyReview = catchAsync(async (req, res, next) => {
-  const payload = filterObject(req.body, ["review"]);
-  // const review
-});
-
-export const deleteReview = catchAsync(async (req, res, next) => {
-  const deleteReview = await Review.findByIdAndDelete(req.params.id, {
-    lean: true,
-  }).exec();
-
-  if (!deleteReview) {
-    return next(new AppError("No review found with this ID", 404));
-  }
-
-  res.status(204).json({
-    status: "success",
-    data: { deleteReview },
-  });
+export const getAllReviews = factory.getAll(service.getAllReviews, (req) => {
+  const filter = req.params.id ? { car: req.params.id } : {};
+  return { filter };
 });

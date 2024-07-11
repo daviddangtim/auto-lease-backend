@@ -1,4 +1,5 @@
 import mongoose, { model } from "mongoose";
+import Car from "./carModel.js";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -37,12 +38,38 @@ reviewSchema.pre(/^find/, function (next) {
   });
 
   this.populate({
-    path: "dealership",
+    path: "car",
     select: "name",
   });
   next();
 });
 
+reviewSchema.statics.calcAverageRating = async function (carId) {
+  const statsArr = await this.aggregate([
+    { $match: { car: carId } },
+    {
+      $group: {
+        _id: "$car",
+        nRating: { $sum: 1 },
+        avRating: { $avg: "$rating" },
+      },
+    },
+  ]);
+
+  const [stats] = statsArr;
+  await Car.findByIdAndUpdate(
+    carId,
+    {
+      ratingsAverage: stats.avRating,
+      ratingsQuantity: stats.nRating,
+    },
+    { lean: true, includeResultMetadata: true },
+  );
+};
+
+reviewSchema.post("save", function () {
+  this.constructor.calcAverageRating(this.car);
+});
 const Review = model("Review", reviewSchema);
 
 export default Review;

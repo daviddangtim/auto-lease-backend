@@ -32,9 +32,9 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
   });
 });
 
-export const getDealership = factory.getOneById(service.getDealership);
+export const getDealership = factory.getById(service.getDealership);
 
-export const getAllDealerships = factory.getMany(service.getAllDealerships);
+export const getAllDealerships = factory.getAll(service.getAllDealerships);
 
 export const updateDealership = factory.updateById(service.updateDealership);
 

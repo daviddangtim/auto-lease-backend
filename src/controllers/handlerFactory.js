@@ -14,7 +14,7 @@ export const updateById = (service) =>
   catchAsync(async (req, res) => {
     const { key, value } = await service(req.body, req.params.id);
 
-    res.status(201).json({
+    res.status(200).json({
       statusText: "success",
       data: { [key]: value },
     });
@@ -30,7 +30,7 @@ export const createOne = (service) =>
     });
   });
 
-export const getOneById = (service) =>
+export const getById = (service) =>
   catchAsync(async (req, res) => {
     const { key, value } = await service(req.params.id);
 
@@ -40,9 +40,11 @@ export const getOneById = (service) =>
     });
   });
 
-export const getMany = (service) =>
+export const getAll = (service, cb = (req) => req) =>
   catchAsync(async (req, res) => {
-    const { key, value } = await service(req.query);
+    const { filter } = cb(req);
+    console.log(filter);
+    const { key, value } = await service(req.query, filter || {});
 
     res.status(200).json({
       numResult: value.length,

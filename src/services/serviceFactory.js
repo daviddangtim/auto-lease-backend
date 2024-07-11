@@ -36,10 +36,10 @@ export const updateById = async (Model, id, update) => {
 export const createOne = async (Model, data) => {
   const doc = await Model.create(data);
 
-  return { key: Model.modelName, value: doc };
+  return { key: Model.modelName.toLocaleLowerCase(), value: doc };
 };
 
-export const getOneById = async (Model, id, options = {}, cb = (q) => q) => {
+export const getOneById = async (Model, id, cb = (q) => q) => {
   const query = cb(Model.findById(id));
   const doc = await query.exec();
 
@@ -48,18 +48,12 @@ export const getOneById = async (Model, id, options = {}, cb = (q) => q) => {
   return { key: Model.modelName.toLocaleLowerCase(), value: doc };
 };
 
-export const getMany = async (Model, queryObj, options = {}, cb = (q) => q) => {
-  let query;
-
-  if (options.sensitive) {
-    query = new AppQueries(queryObj, Model.find())
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-  } else {
-    query = new AppQueries(queryObj, Model.find()).filter().sort().paginate();
-  }
+export const getAll = async (Model, queryObj, filter = {}, cb = (q) => q) => {
+  const query = new AppQueries(queryObj, Model.find(filter))
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
   const docs = await cb(query.query).exec();
 
