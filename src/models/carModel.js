@@ -10,7 +10,7 @@ const carSchema = new mongoose.Schema(
     dealership: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Dealership",
-      required: [true, "A car must have a dealership"],
+      required: [true, "A car must belong to a dealership"],
     },
 
     name: {

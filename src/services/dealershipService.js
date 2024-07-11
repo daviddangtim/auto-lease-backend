@@ -91,7 +91,7 @@ export const getDealership = async (dealershipId) =>
   await factory.getOneById(Dealership, dealershipId);
 
 export const getAllDealerships = async (query) =>
-  await factory.getMany(Dealership, query);
+  await factory.getAll(Dealership, query, {}, (q) => q.lean());
 
 export const deleteDealership = async (dealershipId) =>
   await factory.deleteById(Dealership, dealershipId);

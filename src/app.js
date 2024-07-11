@@ -23,7 +23,7 @@ const app = express();
 keepAwake();
 
 const limiter = rateLimit({
-  max: 100,
+  max: 1000000,
   windowMs: 60 * 60 * 1000,
   message: `To many request from this IP, please try again in an hour`,
 });

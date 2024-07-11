@@ -10,10 +10,11 @@ router.use(protect);
 
 router.post("/apply", restrictTo(USER), controller.applyForDealership);
 
+router.get("/me", controller.getMe);
 router.patch("/update/me", controller.updateMe);
 router.patch("/delete/me", controller.deleteMe);
 
-router.patch("/update-Password/me", controller.updateMyPassword);
+router.patch("/update-password", controller.updateMyPassword);
 router.patch("/update-photo/me", controller.updateProfilePhoto);
 
 router.use(restrictTo(ADMIN));

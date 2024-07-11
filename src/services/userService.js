@@ -15,7 +15,7 @@ export const getUser = async (userId) =>
   factory.getOneById(User, userId, (q) => q.lean());
 
 export const getAllUsers = async (query) =>
-  factory.getMany(User, query, { sensitive: true }, (q) => q.lean());
+  factory.getAll(User, query, {}, (q) => q.lean());
 
 export const updateUser = async (reqBody, userId) =>
   factory.updateById(
