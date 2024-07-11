@@ -2,7 +2,6 @@
 import express from "express";
 import bodyParser from "express";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import xss from "xss-clean";
 
@@ -22,14 +21,7 @@ const app = express();
 //CRON JOBS
 keepAwake();
 
-const limiter = rateLimit({
-  max: 1000,
-  windowMs: 60 * 60 * 1000,
-  message: `To many request from this IP, please try again in an hour`,
-});
-
 app.use(helmet());
-app.use("/api", limiter);
 app.use(bodyParser.json({ limit: "10kb" }));
 app.use(mongoSanitize());
 app.use(xss());
