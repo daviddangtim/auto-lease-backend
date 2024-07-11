@@ -26,7 +26,7 @@ export const updateById = async (Model, id, update) => {
     lean: true,
     runValidators: true,
     new: true,
-  }).exec();
+  });
 
   if (!doc) errMsg(Model);
 

@@ -70,6 +70,15 @@ reviewSchema.statics.calcAverageRating = async function (carId) {
 reviewSchema.post("save", function () {
   this.constructor.calcAverageRating(this.car);
 });
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.doc = await this.model.findOne(this.getQuery());
+  next();
+});
+reviewSchema.post(/^findOneAnd/, async function (next) {
+  await this.doc.constructor.calcAverageRating(this.doc.car._id);
+});
+
 const Review = model("Review", reviewSchema);
 
 export default Review;

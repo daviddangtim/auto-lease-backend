@@ -1,8 +1,9 @@
+import axios from "axios";
 import cron from "node-cron";
 import chalk from "chalk";
 
 export const keepAwake = () =>
-  cron.schedule("10 * * * *", async () => {
+  cron.schedule("* * * * *", async () => {
     try {
       const response = await fetch(
         `https://auto-lease.onrender.com/api/v1/auth/sign-in`,
@@ -13,18 +14,22 @@ export const keepAwake = () =>
           },
           body: JSON.stringify({
             email: process.env.CRONE_USER_EMAIL,
-            password: process.env.CRONE_USER_PASSWORD + 1,
+            password: process.env.CRONE_USER_PASSWORD,
           }),
         },
       );
 
+      // Debug HTTP status
+      console.log(chalk.green("HTTP status:", response.status));
+
       if (!response.ok) {
         const errRes = await response.json();
-        return console.error(
+        console.error(
           chalk.red(
-            `HTTP error! status: ${errRes.status}, ${errRes.statusText}`,
+            `HTTP error! status: ${response.status}, ${errRes.statusText}`,
           ),
         );
+        return; // Ensure to exit early in case of error
       }
 
       const data = await response.json();
@@ -34,6 +39,6 @@ export const keepAwake = () =>
         ),
       );
     } catch (err) {
-      console.log();
+      console.error(chalk.red("Fetch error:", err));
     }
   });
