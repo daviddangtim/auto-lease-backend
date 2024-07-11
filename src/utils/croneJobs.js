@@ -3,7 +3,7 @@ import cron from "node-cron";
 import chalk from "chalk";
 
 export const keepAwake = () =>
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("10 * * * *", async () => {
     try {
       const res = await axios.post(
         "https://auto-lease.onrender.com/api/v1/auth/sign-in",
