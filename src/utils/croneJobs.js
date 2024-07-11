@@ -14,7 +14,7 @@ export const keepAwake = () =>
         { headers: { "Content-Type": "application/json" }, method: "POST" },
       );
 
-      console.log(res);
+      console.log(res.data.message);
     } catch (err) {
       console.log(chalk.red(err));
     }
