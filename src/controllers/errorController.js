@@ -71,7 +71,7 @@ const handleTokenExpiredError = () => {
 
 const globalError = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.statusText = err.statusText || "Internal Server Error";
+  err.statusText = err.statusText || "error";
 
   if (process.env.NODE_ENV === "development") {
     sendDevError(err, res);
