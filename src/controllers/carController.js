@@ -9,7 +9,7 @@ import Dealership from "../models/dealershipModel.js";
 
 
 
-export const createCar = catchAsync(async (req, res, next) => {
+export const createCarV2 = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const dealership = await Dealership.findOne(
       { car: { _id: userId } },
