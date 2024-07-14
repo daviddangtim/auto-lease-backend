@@ -39,7 +39,7 @@ export const generateOtp = (len) => {
 export const parseMongoQuery = (query) =>
   JSON.parse(
     JSON.stringify(query).replace(
-      /\b(gte|gt|lte|lt|in|ne|eq)\b/g,
+      /\b(gte|gt|lte|lt|in|ne|eq|regex|options)\b/g,
       (match) => `$${match}`,
     ),
   );
