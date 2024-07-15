@@ -68,16 +68,15 @@ export const updateMe = async (reqBody, userId) => {
       403,
     );
   }
-// const buffer = req.file.buffer;
+  // const buffer = req.file.buffer;
 
   const payload = filterObject(reqBody, ["email", "name", "photo"]);
 
-// const result = cloudinaryImageUploader(buffer);
+  // const result = cloudinaryImageUploader(buffer);
 
-// payload.photo
+  // payload.photo
 
   const user = await User.findByIdAndUpdate(userId, payload, {
-    includeResultMetadata: true,
     lean: true,
     new: true,
   }).exec();
