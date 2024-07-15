@@ -9,7 +9,7 @@ import Dealership from "../models/dealershipModel.js";
 
 
 
-export const createCarV2 = catchAsync(async (req, res, next) => {
+export const createCarV1 = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const dealership = await Dealership.findOne(
       { car: { _id: userId } },
@@ -31,41 +31,6 @@ export const createCarV2 = catchAsync(async (req, res, next) => {
   res.status(201).json({
     statusText: "success",
     data: { car },
-  });
-});
-
-// TODO: Implement photo functionality
-export const createCarV1 = catchAsync(async (req, res, next) => {
-  const car = await new Car({
-    ...req.body,
-  });
-  const urls = [];
-  const files = req.files;
-  for (const file of files) {
-    const { path } = file;
-    const newPath = await cloudinaryImageUploader(path);
-    urls.push(newPath);
-  }
-  car.dealership = req.user._id;
-  const image = req.file.path;
-
-  const result = await cloudinary.uploader.upload(image);
-
-  // Not too sure what I'm doing here
-  car.photos.push(result.secure_url);
-  car.photosId.push(result.public_id);
-
-  if (!car) {
-    return next(new AppError("Unable to create car", 400));
-  }
-
-  await car.save();
-
-  res.status(201).json({
-    status: "success",
-    data: {
-      car,
-    },
   });
 });
 

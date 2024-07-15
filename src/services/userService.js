@@ -3,6 +3,7 @@ import Email from "../utils/email.js";
 import { createDealership } from "./dealershipService.js";
 import { comparePassword } from "../utils/userHelper.js";
 import { filterObject, isProduction } from "../utils/helpers.js";
+import { cloudinaryImageUploader } from "../utils/imageUploader.js";
 import * as factory from "./serviceFactory.js";
 import * as constants from "../utils/constants.js";
 import User from "../models/userModel.js";
@@ -67,8 +68,13 @@ export const updateMe = async (reqBody, userId) => {
       403,
     );
   }
+// const buffer = req.file.buffer;
 
-  const payload = filterObject(reqBody, ["email", "name", "Photo"]);
+  const payload = filterObject(reqBody, ["email", "name", "photo"]);
+
+// const result = cloudinaryImageUploader(buffer);
+
+// payload.photo
 
   const user = await User.findByIdAndUpdate(userId, payload, {
     includeResultMetadata: true,

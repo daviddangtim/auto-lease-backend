@@ -1,6 +1,7 @@
 import express from "express";
 import { protect, restrictTo } from "../middlewares/guard.js";
 import { ROLES } from "../utils/constants.js";
+import {upload} from "../utils/imageUploader.js"
 import * as controller from "../controllers/userController.js";
 
 const router = express.Router({ mergeParams: true });
@@ -11,7 +12,7 @@ router.use(protect);
 router.post("/apply", restrictTo(USER), controller.applyForDealership);
 
 router.get("/me", controller.getMe);
-router.patch("/update/me", controller.updateMe);
+router.patch("/update/me",upload.single('photo'), controller.updateMe);
 router.patch("/delete/me", controller.deleteMe);
 
 router.patch("/update-password", controller.updateMyPassword);
