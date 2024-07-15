@@ -43,7 +43,6 @@ export const getById = (service) =>
 export const getAll = (service, cb = (req) => req) =>
   catchAsync(async (req, res) => {
     const { filter } = cb(req);
-    console.log(filter);
     const { key, value } = await service(req.query, filter || {});
 
     res.status(200).json({

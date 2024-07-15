@@ -15,6 +15,7 @@ import authRouter from "./routes/authRouter.js";
 import dealershipRouter from "./routes/dealershipRouter.js";
 import carRouter from "./routes/carRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
+import { ensureValidObject } from "./middlewares/x.js";
 
 const app = express();
 
@@ -26,6 +27,8 @@ app.use(bodyParser.json({ limit: "10kb" }));
 app.use(mongoSanitize());
 app.use(xss());
 app.use(morgan("dev"));
+
+app.use(ensureValidObject); // this prevents mongoose from breaking when it receives a string instead of an object
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);

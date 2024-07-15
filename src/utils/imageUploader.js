@@ -4,10 +4,6 @@ import dotenv from "dotenv";
 import AppError from "./appError.js";
 
 dotenv.config();
-// https://documenter.getpostman.com/view/33750764/2sA3kPq5Dn
-// CLOUDINARY_SECRET = ZijamcySkMklz6EXCliUHcIavZI
-// CLOUDINARY_KEY = 916958164963943
-// CLOUD_NAME = dn9awm7ry
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -43,6 +39,8 @@ const upload = multer({
 });
 
 const uploadMultiple = async (req, res, next) => {
+  console.log(req.files);
+
   try {
     const images = req.files.photos;
 
@@ -57,7 +55,7 @@ const uploadMultiple = async (req, res, next) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "auto-lease",
-            resource_type: "auto",
+            resource_type: "image",
             transformation: [
               { width: 1000, crop: "scale" },
               { quality: "auto" },

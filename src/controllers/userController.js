@@ -1,6 +1,5 @@
 import AppError from "../utils/appError.js";
 import {
-  cloudinary,
   cloudinaryImageUpdater,
   cloudinaryImageUploader,
 } from "../utils/imageUploader.js";
@@ -113,28 +112,5 @@ export const revokeDealership = catchAsync(async (req, res) => {
   res.status(200).json({
     statusText: "success",
     data: { user },
-  });
-});
-
-export const updateProfilePhoto = catchAsync(async (req, res, next) => {
-  const { image } = req.file;
-  const user = await findById(req.user._id);
-  await cloudinary.uploader.destroy(user.photoId);
-  const result = await cloudinary.uploader.upload(image);
-
-  if (!result) {
-    return next(new AppError("Unable to upload image", 500));
-  }
-
-  user.photo = result.secure_url;
-  user.photoId = result.public_id;
-
-  await user.save();
-
-  res.status(200).json({
-    statusText: "Success",
-    data: {
-      user,
-    },
   });
 });
