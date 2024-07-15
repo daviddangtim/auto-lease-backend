@@ -91,16 +91,6 @@ const carSchema = new mongoose.Schema(
       type: Date,
       required: [true, "A car must have a lease duration"],
     },
-
-    // coverImage: {
-    //   type: String,
-    //   required: true,
-    // },
-    // coverImageId: {
-    //   type: String,
-    //   required: true,
-    // },
-
     coverImage: {
       type: photoSchema,
       required: true,

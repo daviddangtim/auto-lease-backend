@@ -70,30 +70,36 @@ const handleTokenExpiredError = () => {
 };
 
 const globalError = (err, req, res, next) => {
+  console.log("This stupid error was passed heere");
   err.statusCode = err.statusCode || 500;
   err.statusText = err.statusText || "error";
 
-  if (process.env.NODE_ENV === "development") {
-    sendDevError(err, res);
-  } else {
-    let cloneErr = cloneDeep(err);
+  try {
+    if (process.env.NODE_ENV === "development") {
+      sendDevError(err, res);
+    } else {
+      let cloneErr = cloneDeep(err);
 
-    if (cloneErr.name === "ValidationError") {
-      cloneErr = handleDbValidationError(cloneErr);
-    } else if (cloneErr.code === 11000) {
-      cloneErr = handleDbDuplicateError(cloneErr);
-    } else if (cloneErr.code === 31254) {
-      cloneErr = handleDbInclusionError(cloneErr);
-    } else if (cloneErr.name === "CastError") {
-      cloneErr = handleDbCastError(cloneErr);
-    } else if (cloneErr.name === "JsonWebTokenError") {
-      cloneErr = handleJsonWebTokenError();
-    } else if (cloneErr.name === "TokenExpiredError") {
-      cloneErr = handleTokenExpiredError();
-    } else if (cloneErr.name === "MongoServerSelectionError") {
-      cloneErr = handleDbMongoServerSelectionError(cloneErr);
+      if (cloneErr.name === "ValidationError") {
+        cloneErr = handleDbValidationError(cloneErr);
+      } else if (cloneErr.code === 11000) {
+        cloneErr = handleDbDuplicateError(cloneErr);
+      } else if (cloneErr.code === 31254) {
+        cloneErr = handleDbInclusionError(cloneErr);
+      } else if (cloneErr.name === "CastError") {
+        cloneErr = handleDbCastError(cloneErr);
+      } else if (cloneErr.name === "JsonWebTokenError") {
+        cloneErr = handleJsonWebTokenError();
+      } else if (cloneErr.name === "TokenExpiredError") {
+        cloneErr = handleTokenExpiredError();
+      } else if (cloneErr.name === "MongoServerSelectionError") {
+        cloneErr = handleDbMongoServerSelectionError(cloneErr);
+      }
+      sendProdError(cloneErr, res);
     }
-    sendProdError(cloneErr, res);
+  } catch (err) {
+    console.log(err);
+    console.log("This erorr is more than we can handle");
   }
 };
 
