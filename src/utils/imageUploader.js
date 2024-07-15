@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import AppError from "./appError.js";
 
 dotenv.config();
-
+// https://documenter.getpostman.com/view/33750764/2sA3kPq5Dn
 // CLOUDINARY_SECRET = ZijamcySkMklz6EXCliUHcIavZI
 // CLOUDINARY_KEY = 916958164963943
 // CLOUD_NAME = dn9awm7ry
