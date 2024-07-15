@@ -5,6 +5,11 @@ import AppError from "./appError.js";
 
 dotenv.config();
 
+CLOUDINARY_SECRET = ZijamcySkMklz6EXCliUHcIavZI
+CLOUDINARY_KEY = 916958164963943
+CLOUD_NAME = dn9awm7ry
+
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_KEY,
