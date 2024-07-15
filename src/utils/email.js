@@ -112,4 +112,8 @@ export default class Email {
       },
     );
   }
+
+  async sendContactUsRes() {
+    await this.send("endContactUsRes", "Contact Us");
+  }
 }

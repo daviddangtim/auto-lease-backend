@@ -5,13 +5,13 @@ import chalk from "chalk";
 export const keepAwake = () =>
   cron.schedule("10 * * * *", async () => {
     try {
-      const res = await axios.post(
-        "https://auto-lease.onrender.com/api/v1/auth/sign-in",
+      const res = await axios.patch(
+        "https://auto-lease.onrender.com/api/v1/auth/verify/token",
         {
-          email: process.env.CRONE_USER_EMAIL,
-          password: process.env.CRONE_USER_PASSWORD,
+          // email: process.env.CRONE_USER_EMAIL,
+          // password: process.env.CRONE_USER_PASSWORD,
         },
-        { headers: { "Content-Type": "application/json" }, method: "POST" },
+        { headers: { "Content-Type": "application/json" }, method: "PATCH" },
       );
 
       console.log(res.data.message);

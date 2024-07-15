@@ -12,6 +12,8 @@ export default class AppQueries {
     excluded.forEach((el) => delete cQueryObject[el]);
 
     this.query = this.query.find(parseMongoQuery(cQueryObject));
+
+    console.log(this.queryObject, this.query.getQuery());
     return this;
   }
 
