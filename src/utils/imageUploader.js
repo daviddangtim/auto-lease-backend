@@ -36,46 +36,102 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage,
     limits: {fileSize: maxSize},
-    fileFilter: fileFilter,
 });
 
 const uploadMultiple = async (req, res, next) => {
-    const images = req.files;
-    console.log(images);
-    const photos = [];
-    const photosId = [];
+    try {
+        const images = req.files;
+        console.log(images);
+        const photos = [];
+        const photosId = [];
 
-    for (const image of images) {
-        const result = await cloudinary.uploader.upload(image.path, {
-            folder: "auto-lease",
-            resource_type: "auto"
-        });
-        photos.push(result.secure_url);
-        photosId.push(result.public_id);
+        for (const image of images) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream({
+                    folder: "auto-lease",
+                    resource_type: "auto",
+                    transformation: [
+                        { width: 1000, crop: "scale" },
+                        { quality: "auto" },
+                        { fetch_format: "auto" }
+                      ],
+                    use_filename: true
+                }, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                });
+                uploadStream.end(image.buffer);
+            });
+
+            photos.push(result.secure_url);
+            photosId.push(result.public_id);
+        }
+
+        req.body.photos = photos;
+        req.body.photosId = photosId;
+        next();
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('An error occurred while uploading files');
     }
-
-    req.photos = photos;
-    req.photosId = photosId;
-    next();
-}
+};
 
 
-const cloudinaryImageUploader = async (file) => {
-    return await cloudinary.uploader.upload(file, {
-        folder: "auto-lease",
+
+const cloudinaryImageUploader = async (buffer) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({
+            transformation: [
+                { width: 1000, crop: "scale" },
+                { quality: "auto" },
+                { fetch_format: "auto" }
+              ],
+            folder: "auto-lease"
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+        uploadStream.end(buffer);
     });
 };
 
-const cloudinaryImageUpdater = async (imageToUpdate, previousImageId) => {
-    await cloudinary.uploader.destroy(previousImageId, {
-        folder: "auto-lease",
-        resource_type: "auto",
-    });
+const cloudinaryImageUpdater = async (buffer, previousImageId) => {
+    try {
+        await cloudinary.uploader.destroy(previousImageId, {
+            folder: "auto-lease",
+            resource_type: "auto"
+        });
 
-    return await cloudinary.uploader.upload(imageToUpdate, {
-        folder: "auto-lease",
-        resource_type: "auto",
-    });
-}
+        return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream({
+                folder: "auto-lease",
+                transformation: [
+                    { width: 1000, crop: "scale" },
+                    { quality: "auto" },
+                    { fetch_format: "auto" }
+                  ],
+                resource_type: "auto"
+            }, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+            uploadStream.end(buffer);
+        });
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Transforms images
+// const cloudinaryImageRetriever = async (public_id,{transform})
 
 export {upload, cloudinary, cloudinaryImageUploader, cloudinaryImageUpdater, uploadMultiple};

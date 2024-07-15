@@ -40,6 +40,8 @@ export const updateMyPassword = catchAsync(async (req, res) => {
 });
 
 export const updateMe = catchAsync(async (req, res) => {
+  console.log(req.file);
+  
   const { user } = await service.updateMe(req.body, req.user.id);
 
   res.status(200).json({
