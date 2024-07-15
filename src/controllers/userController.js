@@ -1,5 +1,5 @@
 import AppError from "../utils/appError.js";
-import { cloudinary } from "../utils/imageUploader.js";
+import { cloudinary, cloudinaryImageUploader } from "../utils/imageUploader.js";
 import { catchAsync } from "../utils/helpers.js";
 import * as service from "../services/userService.js";
 import * as factory from "./handlerFactory.js";
@@ -40,8 +40,10 @@ export const updateMyPassword = catchAsync(async (req, res) => {
 });
 
 export const updateMe = catchAsync(async (req, res) => {
-  console.log(req.file);
-  
+  console.log(req.file, req.body);
+
+  req.body.photo = await cloudinaryImageUploader(req.file.buffer)
+
   const { user } = await service.updateMe(req.body, req.user.id);
 
   res.status(200).json({
