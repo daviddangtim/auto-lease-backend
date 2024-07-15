@@ -5,13 +5,13 @@ import AppError from "./appError.js";
 
 dotenv.config();
 
-CLOUDINARY_SECRET = ZijamcySkMklz6EXCliUHcIavZI
-CLOUDINARY_KEY = 916958164963943
-CLOUD_NAME = dn9awm7ry
+// CLOUDINARY_SECRET = ZijamcySkMklz6EXCliUHcIavZI
+// CLOUDINARY_KEY = 916958164963943
+// CLOUD_NAME = dn9awm7ry
 
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
+    cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUDINARY_KEY,
     api_secret: process.env.CLOUDINARY_SECRET,
 });
@@ -87,6 +87,7 @@ const uploadMultiple = async (req, res, next) => {
 
 
 const cloudinaryImageUploader = async (buffer) => {
+    
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream({
             transformation: [

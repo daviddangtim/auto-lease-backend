@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 
 import { ApplicationStatus, ROLES } from "../utils/constants.js";
 import pointSchema from "./pointSchema.js";
+import { photoSchema } from "./photoSchema.js";
 
 const { APPROVED, PENDING, REJECTED, REVOKED } = ApplicationStatus;
 const { USER, DEALER, ADMIN, Driver } = ROLES;
@@ -113,8 +114,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    photo: String,
-    photoId: String,
+   photo:{
+    type:photoSchema
+   },
     isVerified: Boolean,
     location: pointSchema,
   },
