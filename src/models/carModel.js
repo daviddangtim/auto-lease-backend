@@ -3,6 +3,7 @@ import slugify from "slugify";
 import { limitArrayLength } from "../utils/helpers.js";
 import pointSchema from "./pointSchema.js";
 import { CATEGORY } from "../utils/constants.js";
+import { photoSchema } from "./photoSchema.js";
 
 const { BASIC, CLASSIC, LUXURY } = CATEGORY;
 const carSchema = new mongoose.Schema(
@@ -99,17 +100,18 @@ const carSchema = new mongoose.Schema(
     //   type: String,
     //   required: true,
     // },
+
+    coverImage: {
+      type: photoSchema,
+      required: true,
+    },
     photos: {
-      type: [String],
+      type: [photoSchema],
       required: [true, "A car must have at least a photo"],
       validate: [
         limitArrayLength(10, 1),
         "Photos array must contain between 1 and 10 items",
       ],
-    },
-    photosId: {
-      type: [String],
-      required: [true, "A car photo must have an id"],
     },
     price: {
       type: Number,

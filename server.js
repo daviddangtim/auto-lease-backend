@@ -21,13 +21,13 @@ const startServer = async () => {
     );
   });
 
-  process.on("unhandledRejection", (err) => {
-    console.log(err.name, err.message);
-    console.log(chalk.red(`UNHANDLED REJECTION 🧨 Shutting down`));
-    server.close(() => {
-      process.exit(1);
-    });
-  });
+  // process.on("unhandledRejection", (err) => {
+  //   console.log(err.name, err.message);
+  //   console.log(chalk.red(`UNHANDLED REJECTION 🧨 Shutting down`));
+  //   server.close(() => {
+  //     process.exit(1);
+  //   });
+  // });
 };
 
 (async () => await startServer())();
