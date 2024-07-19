@@ -39,10 +39,14 @@ const upload = multer({
 });
 
 const uploadMultiple = async (req, res, next) => {
-  console.log(req.files);
+  if (!req.files && !req.files?.photos) {
+    return next();
+  }
 
   try {
     const images = req.files.photos;
+
+    console.log(images);
 
     if (!images) {
       return next(new AppError("No images to upload", 400));
@@ -74,15 +78,17 @@ const uploadMultiple = async (req, res, next) => {
         uploadStream.end(image.buffer);
       });
 
-      photos.push({ uri: result.secure_url, id: result.public_id });
+      photos.push({ url: result.secure_url, id: result.public_id });
     }
+
+    console.log({ photos });
 
     req.body.photos = photos;
 
     console.log(photos);
     next();
   } catch (error) {
-    console.log(error);
+    console.log(error.name, error.message);
 
     next(new AppError("An error occurred while uploading files", 500));
   }

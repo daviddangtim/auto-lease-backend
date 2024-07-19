@@ -2,6 +2,7 @@ import { catchAsync } from "../utils/helpers.js";
 import {
   cloudinaryImageUpdater,
   cloudinaryImageUploader,
+  upload,
 } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";
 
@@ -9,7 +10,7 @@ export const setCreateCoverImage = catchAsync(async (req, res, next) => {
   const coverImage = req?.files?.coverImage;
 
   if (!coverImage) {
-    return next(new AppError("Cover image is required", 400));
+    return next();
   }
 
   const result = await cloudinaryImageUploader(coverImage[0].buffer);
@@ -27,19 +28,33 @@ export const setUpdateCoverImage = (Model) =>
       .lean()
       .exec();
 
-    if (doc) {
-      const result = await cloudinaryImageUpdater(
-        req.file.buffer,
-        doc.coverImage.id,
-      );
-
-      req.body.coverImage = {
-        url: result.secure_url,
-        id: result.public_id,
-      };
+    if (!doc) {
+      return next();
     }
+
+    const coverImage = req?.files?.coverImage;
+
+    if (!coverImage) {
+      return next();
+    }
+
+    const result = await cloudinaryImageUpdater(
+      coverImage.buffer,
+      doc.coverImage.id,
+    );
+
+    req.body.coverImage = {
+      url: result.secure_url,
+      id: result.public_id,
+    };
     next();
   });
+
+export const setCoverAndPhotos = () =>
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "photos", maxCount: 10 },
+  ]);
 
 export const ensureValidObject = (req, res, next) => {
   const flags = ["photos", "locations"];
