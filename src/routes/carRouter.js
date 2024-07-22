@@ -2,13 +2,8 @@ import express from "express";
 import * as carController from "../controllers/carController.js";
 import { protect, restrictTo } from "../middlewares/guard.js";
 import { ROLES } from "../utils/constants.js";
-import { uploadMultiple } from "../utils/imageUploader.js";
-import {
-  setCoverAndPhotos,
-  setCreateCoverImage,
-  setUpdateCoverImage,
-} from "../middlewares/x.js";
-import Car from "../models/carModel.js";
+import { upload, uploadMultiple } from "../utils/imageUploader.js";
+import { ensureValidObject, setCreateCoverImage } from "../middlewares/x.js";
 
 const router = express.Router({ mergeParams: true });
 const { DEALER, ADMIN } = ROLES;
@@ -19,7 +14,10 @@ router
     protect,
     restrictTo(DEALER, ADMIN),
     carController.setDealershipId,
-    setCoverAndPhotos(),
+    upload.fields([
+      { name: "coverImage", maxCount: 1 },
+      { name: "photos", maxCount: 10 },
+    ]),
     setCreateCoverImage,
     uploadMultiple,
     carController.createCar,
@@ -30,14 +28,19 @@ router
   .route("/:id")
   .get(carController.getCar)
   .delete(protect, restrictTo(ADMIN, DEALER), carController.deleteCar)
-  .patch(
+  .patch(protect, restrictTo(ADMIN, DEALER), carController.updateCar);
+router
+  .route("/")
+  .post(
     protect,
-    restrictTo(ADMIN, DEALER),
-    carController.setDealershipId,
-    setCoverAndPhotos(),
-    setUpdateCoverImage(Car),
+    upload.array("photos"),
     uploadMultiple,
-    carController.updateCar,
-  );
+    carController.createCarV1,
+  )
+  .get(carController.getAllCars);
+router
+  .route("/:id")
+  .get(carController.getCar)
+  .patch(upload.array("photos"), carController.updateCar);
 
 export default router;

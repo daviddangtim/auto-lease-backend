@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import slugify from "slugify";
 import pointSchema from "./pointSchema.js";
 import { photoSchema } from "./photoSchema.js";
+import { limitArrayLength } from "../utils/helpers.js";
 
 export const dealershipSchema = new mongoose.Schema(
   {
@@ -56,7 +57,11 @@ export const dealershipSchema = new mongoose.Schema(
     },
     photos: {
       type: [photoSchema],
-      required: [true, "A dealership must have some photos"],
+      required: [true, "A car must have at least a photo"],
+      validate: [
+        limitArrayLength(10, 1),
+        "Photos array must contain between 1 and 10 items",
+      ],
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
