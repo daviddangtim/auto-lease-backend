@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
 import pointSchema from "./pointSchema.js";
+import { photoSchema } from "./photoSchema.js";
 
 export const dealershipSchema = new mongoose.Schema(
   {
@@ -24,13 +25,13 @@ export const dealershipSchema = new mongoose.Schema(
         "A dealership must have a valid valid Dealership Licence",
       ],
     },
-    description: {
-      type: String,
-      trim: true,
-      required: [true, "Description is required"],
-      maxlength: [500, "Description cannot be more than 500 characters"],
-      minLength: [200, "Description cannot be less than 200 characters"],
-    },
+    // description: {
+    //   type: String,
+    //   trim: true,
+    //   required: [true, "Description is required"],
+    //   maxlength: [500, "Description cannot be more than 500 characters"],
+    //   minLength: [200, "Description cannot be less than 200 characters"],
+    // },
     summary: {
       type: String,
       trim: true,
@@ -44,16 +45,19 @@ export const dealershipSchema = new mongoose.Schema(
       max: [100, "A dealership reputation cannot be more than 100%"],
       min: [0, "A dealership reputation cannot be less than 0%"],
     },
-    startLocation: {
-      type: pointSchema,
-      required: [true, "Start location is required"],
-      index: "2dsphere",
-    },
+    // startLocation: {
+    //   type: pointSchema,
+    //   required: [true, "Start location is required"],
+    //   index: "2dsphere",
+    // },
     coverImage: {
-      type: String,
+      type: photoSchema,
       required: ["A Dealership must have a cover image"],
     },
-    photos: [String],
+    photos: {
+      type: [photoSchema],
+      required: [true, "A dealership must have some photos"],
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -66,7 +70,7 @@ export const dealershipSchema = new mongoose.Schema(
       },
     ],
     isApproved: Boolean,
-    locations: [pointSchema],
+    // locations: [pointSchema],
     slug: String,
   },
   {

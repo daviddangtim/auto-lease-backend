@@ -141,7 +141,7 @@ export const applyForDealership = async (reqBody, user) => {
       { lean: true },
     ).exec();
 
-    await factory.deleteById();
+    await User.findOneAndDelete({ owner: user.id }, { lean: true });
     throw new AppError(
       isProduction
         ? "An error occurred while submitting your dealership application. Please try again."
@@ -295,11 +295,10 @@ export const revokeDealership = async (userId, reason) => {
   } catch (err) {
     user.role = DEALER;
     dealership.isApproved = true;
-
-    await Promise.all([
+    -(await Promise.all([
       user.save({ validateBeforeSave: false }),
       dealership.save({ validateBeforeSave: false }),
-    ]);
+    ]));
 
     throw new AppError("There was an error revoking the dealership", 500);
   }

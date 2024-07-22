@@ -74,6 +74,7 @@ export const deleteMe = catchAsync(async (req, res) => {
 });
 
 export const applyForDealership = catchAsync(async (req, res) => {
+  console.log({ reqBody: req.body });
   const { message } = await service.applyForDealership(req.body, req.user);
 
   res.status(200).json({
