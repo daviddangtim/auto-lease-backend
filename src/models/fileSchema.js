@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const photoSchema = new mongoose.Schema(
+export const fileSchema = new mongoose.Schema(
   {
     url: {
       type: String,

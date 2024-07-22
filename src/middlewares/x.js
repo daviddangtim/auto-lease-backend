@@ -6,7 +6,7 @@ import {
 } from "../utils/imageUploader.js";
 import AppError from "../utils/appError.js";
 
-export const setCreateCoverImage = catchAsync(async (req, res, next) => {
+export const uploadCoverImage = catchAsync(async (req, res, next) => {
   const coverImage = req?.files?.coverImage;
 
   if (!coverImage) {
@@ -19,6 +19,40 @@ export const setCreateCoverImage = catchAsync(async (req, res, next) => {
     url: result.secure_url,
     id: result.public_id,
   };
+  next();
+});
+
+export const uploadDealershipLicense = catchAsync(async (req, res, next) => {
+  const dealershipLicense = req?.files?.coverImage;
+
+  if (!dealershipLicense) {
+    return next();
+  }
+
+  const result = await cloudinaryImageUploader(dealershipLicense[0].buffer);
+
+  req.body.dealershipLicense = {
+    url: result.secure_url,
+    id: result.public_id,
+  };
+
+  next();
+});
+
+export const uploadCacCert = catchAsync(async (req, res, next) => {
+  const cacCert = req?.files?.cacCertificate;
+
+  if (!cacCert) {
+    return next();
+  }
+
+  const result = await cloudinaryImageUploader(cacCert[0].buffer);
+
+  req.body.cacCertificate = {
+    url: result.secure_url,
+    id: result.public_id,
+  };
+
   next();
 });
 

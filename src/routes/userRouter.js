@@ -3,7 +3,12 @@ import { protect, restrictTo } from "../middlewares/guard.js";
 import { ROLES } from "../utils/constants.js";
 import { upload, uploadMultiple } from "../utils/imageUploader.js";
 import * as controller from "../controllers/userController.js";
-import { setCoverAndPhotos } from "../middlewares/x.js";
+import {
+  setCoverAndPhotos,
+  uploadCacCert,
+  uploadCoverImage,
+  uploadDealershipLicense,
+} from "../middlewares/x.js";
 
 const router = express.Router({ mergeParams: true });
 const { USER, ADMIN } = ROLES;
@@ -19,6 +24,9 @@ router.post(
     { name: "dealershipLicence", maxCount: 1 },
     { name: "photos", maxCount: 10 },
   ]),
+  uploadCacCert,
+  uploadDealershipLicense,
+  uploadCoverImage,
   uploadMultiple,
   controller.applyForDealership,
 );
