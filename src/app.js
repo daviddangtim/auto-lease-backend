@@ -6,6 +6,7 @@ import helmet from "helmet";
 import xss from "xss-clean";
 
 import mongoSanitize from "express-mongo-sanitize";
+import cors from "cors";
 // PROJECT IMPORTS
 import AppError from "./utils/appError.js";
 import globalError from "./controllers/errorController.js";
