@@ -129,20 +129,22 @@ export const signIn = async (password, email) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    await new Email(user, { otp }).sendOtp(2);
+    // await new Email(user, { otp }).sendOtp(2);
 
     return {
       message: "log in successful",
+
       // otp: isProduction ? undefined : otp, // TODO: remove this when done
     };
   } catch (err) {
-    await destroyOtpAndSave(user);
-    throw new AppError(
-      isProduction
-        ? "There was an error sending the OTP. Please try again."
-        : `There was an error sending the OTP: ${err.message}`,
-      500,
-    );
+    // await destroyOtpAndSave(user);
+    // throw new AppError(
+    //   isProduction
+    //     ? "There was an error sending the OTP. Please try again."
+    //     : `There was an error sending the OTP: ${err.message}`,
+    //   500,
+    // );
+    console.log(err)
   }
 };
 
