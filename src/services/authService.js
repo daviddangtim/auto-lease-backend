@@ -105,46 +105,46 @@ export const verifyUser = async (token) => {
   };
 };
 
+import User from './models/User'; // Update with the correct path to your User model
+import AppError from './utils/AppError'; // Update with the correct path to your AppError class
+import { generateAndSendJwtCookie, comparePassword, generateOtp, createHash, createTimeStampInEpoch } from './utils'; // Update with correct paths
+import Email from './services/Email'; // Update with the correct path to your Email service
+
 export const signIn = async (password, email) => {
   if (!password || !email) {
     throw new AppError("Both password and email are required.", 401);
   }
 
+  // Find the user by email
   const user = await User.findOne({ email })
     .select("+password +isVerified")
     .exec();
 
+  // Check if user exists and password matches
   if (!user || !(await comparePassword(password, user.password))) {
     throw new AppError("Incorrect password or email.", 401);
   }
 
-  // if (!user.isVerified) {
-  //   await new SendVerificationToken(user).notVerifiedButTrySignInSender();
-  // }
-
+  // Generate OTP and update user
   // const otp = generateOtp(6);
-  // console.log({ otp });
   // user.otp = createHash(otp);
   // user.otpExpires = createTimeStampInEpoch({ m: 2 });
   await user.save({ validateBeforeSave: false });
 
   try {
-    // await new Email(user, { otp }).sendOtp(2);
+    // Send OTP email
+    // await new Email(user, { otp }).sendOtp(2); // Uncomment if you have an Email service
 
-  await generateAndSendJwtCookie(res, user, 201, message);
+    // Generate JWT cookie
+    await generateAndSendJwtCookie(res, user, 200, "Login successful");
+
     return {
-      message: "log in successful",
-      // otp: isProduction ? undefined : otp, // TODO: remove this when done
+      message: "Login successful",
+      // otp: otp, // Include OTP in response for testing purposes (remove in production)
     };
   } catch (err) {
-    // await destroyOtpAndSave(user);
-    // throw new AppError(
-    //   isProduction
-    //     ? "There was an error sending the OTP. Please try again."
-    //     : `There was an error sending the OTP: ${err.message}`,
-    //   500,
-    // );
-    console.log(err)
+    console.error("Error during login process:", err);
+    throw new AppError("There was an error during the login process. Please try again.", 500);
   }
 };
 
