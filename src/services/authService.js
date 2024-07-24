@@ -122,18 +122,18 @@ export const signIn = async (password, email) => {
   //   await new SendVerificationToken(user).notVerifiedButTrySignInSender();
   // }
 
-  const otp = generateOtp(6);
-  console.log({ otp });
-  user.otp = createHash(otp);
-  user.otpExpires = createTimeStampInEpoch({ m: 2 });
+  // const otp = generateOtp(6);
+  // console.log({ otp });
+  // user.otp = createHash(otp);
+  // user.otpExpires = createTimeStampInEpoch({ m: 2 });
   await user.save({ validateBeforeSave: false });
 
   try {
     await new Email(user, { otp }).sendOtp(2);
 
     return {
-      message: "An OTP has been sent to your email.",
-      otp: isProduction ? undefined : otp, // TODO: remove this when done
+      message: "log in successful",
+      // otp: isProduction ? undefined : otp, // TODO: remove this when done
     };
   } catch (err) {
     await destroyOtpAndSave(user);
