@@ -105,10 +105,7 @@ export const verifyUser = async (token) => {
   };
 };
 
-import User from './models/User'; // Update with the correct path to your User model
-import AppError from './utils/AppError'; // Update with the correct path to your AppError class
-import { generateAndSendJwtCookie, comparePassword, generateOtp, createHash, createTimeStampInEpoch } from './utils'; // Update with correct paths
-import Email from './services/Email'; // Update with the correct path to your Email service
+
 
 export const signIn = async (password, email) => {
   if (!password || !email) {
