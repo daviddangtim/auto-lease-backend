@@ -131,9 +131,9 @@ export const signIn = async (password, email) => {
   try {
     // await new Email(user, { otp }).sendOtp(2);
 
+  await generateAndSendJwtCookie(res, user, 201, message);
     return {
       message: "log in successful",
-
       // otp: isProduction ? undefined : otp, // TODO: remove this when done
     };
   } catch (err) {

@@ -29,7 +29,6 @@ export const verifyUser = catchAsync(async (req, res, next) => {
 export const signIn = catchAsync(async (req, res, next) => {
   const { password, email } = req.body;
   const { message} = await authService.signIn(password, email);
-  await generateAndSendJwtCookie(res, message.user, 201, message);
 
   res.status(200).json({
     statusText: "success",
