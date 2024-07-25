@@ -34,6 +34,8 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
 
 export const getDealership = factory.getById(service.getDealership);
 
+export const getAllDealershipsv1 = catchAsync(async (req, res, next) => {});
+
 export const getAllDealerships = factory.getAll(service.getAllDealerships);
 
 export const updateDealership = factory.updateById(service.updateDealership);

@@ -40,17 +40,20 @@ export const getById = (service) =>
     });
   });
 
-export const getAll = (service, cb = (req) => req) =>
-  catchAsync(async (req, res) => {
-    const { filter } = cb(req);
-    const { key, value } = await service(req.query, filter || {});
-
-    res.status(200).json({
-      numResult: value.length,
-      statusText: "success",
-      data: { [key]: value },
+  export const getAll = (service, cb = (req) => req) =>
+    catchAsync(async (req, res) => {
+      const { filter } = cb(req);
+      const enhancedFilter = { ...filter, isApproved: false }; // Ensure only dealerships with isApproved: false are returned
+  
+      const { key, value } = await service(req.query, enhancedFilter);
+  
+      res.status(200).json({
+        numResult: value.length,
+        statusText: "success",
+        data: { [key]: value },
+      });
     });
-  });
+  
 
 export const deleteMany = (service) =>
   catchAsync(async (req, res) => {
