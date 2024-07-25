@@ -87,7 +87,7 @@ dealershipSchema.pre("save", function (next) {
 
 dealershipSchema.pre(/^find/, async function (next) {
   if (!this.options.bypass) {
-    this.find({ isApproved: true });
+    this.find({ isApproved: false });
   }
 
   this.populate({
