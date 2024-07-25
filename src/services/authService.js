@@ -1,6 +1,7 @@
 import AppError from "../utils/appError.js";
 import Email from "../utils/email.js";
 import SendVerificationToken from "../utils/sendVerificationToken.js";
+import generateAndSendJwtCookie from "../utils/generateAndSendJwtCookie.js";
 import User from "../models/userModel.js";
 import { BASE_URL } from "../utils/constants.js";
 import {
