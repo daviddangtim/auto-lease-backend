@@ -10,7 +10,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
-const maxSize = 2 * 1000 * 1000;
+const maxSize = 10 * 1000 * 1000;
 const filetype = (file) => {
   file.mimetype.toString();
 };
