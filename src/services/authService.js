@@ -108,7 +108,7 @@ export const verifyUser = async (token) => {
 
 
 
-export const signIn = async (password, email) => {
+export const signIn = async (password, email,res) => {
   if (!password || !email) {
     throw new AppError("Both password and email are required.", 401);
   }
