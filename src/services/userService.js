@@ -147,39 +147,38 @@ export const applyForDealership = async (reqBody, user) => {
 };
 
 export const approveDealership = async (userId) => {
-  const user = await User.findById(userId).select("+applicationStatus").exec();
-
-  if (!user) {
-    throw new AppError("No user found with this ID", 404);
-  }
-
-  if (user.applicationStatus === REJECTED) {
-    throw new AppError("User's application was rejected", 403);
-  }
-
-  if (user.applicationStatus === REVOKED) {
-    throw new AppError("User's dealership status has been revoked");
-  }
-
-  if (user.applicationStatus === "approved") {
-    throw new AppError("User is already a dealer", 409);
-  }
-
-  const dealership = await Dealership.findOne({ owner: userId })
-    .select("+isApproved")
-    .setOptions({ bypass: true })
-    .exec();
-
-  if (!dealership) {
-    throw new AppError("No dealership associated with this user");
-  }
-
-  // update user's and dealership status
-  dealership.isApproved = true;
-  user.applicationStatus = APPROVED;
-  user.role = DEALER;
-
   try {
+    const user = await User.findById(userId).select("+applicationStatus").exec();
+
+    if (!user) {
+      throw new AppError("No user found with this ID", 404);
+    }
+
+    if (user.applicationStatus === REJECTED) {
+      throw new AppError("User's application was rejected", 403);
+    }
+
+    if (user.applicationStatus === REVOKED) {
+      throw new AppError("User's dealership status has been revoked", 403);
+    }
+
+    if (user.applicationStatus === "approved") {
+      throw new AppError("User is already a dealer", 409);
+    }
+
+    const dealership = await Dealership.findOne({ owner: userId })
+      .select("+isApproved")
+      .setOptions({ bypass: true })
+      .exec();
+
+    if (!dealership) {
+      throw new AppError("No dealership associated with this user", 404);
+    }
+
+    dealership.isApproved = true;
+    user.applicationStatus = APPROVED;
+    user.role = DEALER;
+
     await Promise.all([
       user.save({ validateBeforeSave: false }),
       dealership.save({ validateBeforeSave: false }),
@@ -195,12 +194,19 @@ export const approveDealership = async (userId) => {
 
     return { dealership, user };
   } catch (err) {
-    // Compensation action if there was an error approving
-    user.applicationStatus = PENDING;
-    user.role = USER;
-    dealership.isApproved = false;
+    if (err.name !== 'AppError') {
+      if (user) {
+        user.applicationStatus = PENDING;
+        user.role = USER;
+      }
+      if (dealership) {
+        dealership.isApproved = false;
+      }
 
-    throw new AppError("There was an error approving the dealership", 500);
+      console.error(`Error during dealership approval: ${err.message}`);
+      throw new AppError("There was an error approving the dealership", 500);
+    }
+    throw err; 
   }
 };
 
