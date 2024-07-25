@@ -74,7 +74,7 @@ export const verifyUser = async (token) => {
   }
 
   const user = await User.findOne({
-    verificationToken: createHash(token),
+    verificationToken: token,
     verificationTokenExpires: { $gt: Date.now() },
   })
     .select("+isVerified")
