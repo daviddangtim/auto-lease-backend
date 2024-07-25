@@ -8,6 +8,7 @@ export const signUp = catchAsync(async (req, res) => {
 });
 
 export const requestConfirmationToken = catchAsync(async (req, res) => {
+  console.log("came here")
   const { message } = await authService.requestVerification(req);
 
   res.status(200).json({

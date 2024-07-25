@@ -14,7 +14,7 @@ export default class SendVerificationToken {
 
   async init() {
     this.token = await generateAndSaveVerificationToken(this.user);
-    this.url = `${BASE_URL}/auth/verify/${this.token}`;
+    this.url = `${BASE_URL}/verify/${this.token}`;
 
     // console.log(this.token);
     this.successMsg =

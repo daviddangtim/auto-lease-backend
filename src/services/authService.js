@@ -96,7 +96,7 @@ export const verifyUser = async (token) => {
   user.verificationTokenExpires = undefined;
   user.save({ validateBeforeSave: false });
 
-  const url = `${BASE_URL}/users/account`;
+  const url = `${BASE_URL}/`;
 
   await new Email(user, { url }).sendWelcome();
 
