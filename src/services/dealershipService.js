@@ -90,10 +90,8 @@ export const createDealership = async (reqBody, userId, options = {}) => {
 export const getDealership = async (dealershipId) =>
   await factory.getOneById(Dealership, dealershipId);
 
-export const getAllDealerships = async (query, filter) => {
-  const dealerships = await Dealership.find(filter);
-  return { key: 'dealerships', value: dealerships };
-};
+export const getAllDealerships = async (query) =>
+  await factory.getAll(Dealership, query, {}, (q) => q.lean());
 
 export const deleteDealership = async (dealershipId) =>
   await factory.deleteById(Dealership, dealershipId);
