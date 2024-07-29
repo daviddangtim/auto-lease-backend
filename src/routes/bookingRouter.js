@@ -3,6 +3,7 @@ import  * as bookingController from '../controllers/bookingController.js';
 import { protect, restrictTo } from '../middlewares/guard.js';
 import { ROLES } from '../utils/constants.js';
 import { uploadFrontOfId } from '../middlewares/x.js';
+import { upload } from '../utils/imageUploader.js';
 
 const {ADMIN} = ROLES;
 
