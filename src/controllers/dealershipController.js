@@ -33,12 +33,14 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
   });
 });
 
-export const getDealership = catchAsync(async(req,res,next)=>{
-  const dealership = await Dealership.findOne({owner:req.params.id}).exec()
+export const getDealership = catchAsync(async(req, res, next) => {
+  console.log('Request ID:', req.params.id); // Debugging line
+  const dealership = await Dealership.findOne({ owner: req.params.id }).exec();
+  console.log('Dealership:', dealership); // Debugging line
   res.status(200).json({
     statusText: "success",
-    data: {dealership}
-  })
+    data: { dealership }
+  });
 });
 
 export const getAllDealershipsv1 = catchAsync(async (req, res, next) => {});
