@@ -86,9 +86,6 @@ dealershipSchema.pre("save", function (next) {
 });
 
 dealershipSchema.pre(/^find/, function (next) {
-  if (!this.options.bypass) {
-    this.find({ isApproved: false });
-  }
 
   this.populate({
     path: "owner",
