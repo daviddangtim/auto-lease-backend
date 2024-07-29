@@ -1,7 +1,6 @@
 import express from 'express';
 import { createBooking, getAllBookings } from '../controllers/bookingController.js'; 
-import { protect } from '../middlewares/guard.js';
-import restrictTo from '../middlewares/restrictTo.js';
+import { protect, restrictTo } from '../middlewares/guard.js';
 import { ADMIN } from '../utils/constants.js';
 
 const router = express.Router();
