@@ -34,7 +34,7 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
 });
 
 export const getDealership = catchAsync(async(req,res,next)=>{
-  const dealership = await Dealership.findOne({owner:req.params.id}).select("+isApproved").exec()
+  const dealership = await Dealership.findOne({owner:req.params.id}).exec()
   res.status(200).json({
     statusText: "success",
     data: {dealership}
