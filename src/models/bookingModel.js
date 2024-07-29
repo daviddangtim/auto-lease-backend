@@ -18,25 +18,24 @@ const bookingSchema = new mongoose.Schema(
     },
     deliveryFee: {
       type: Number,
-      default: 1000, // Flat rate for delivery
+      default: 1000,
     },
-   frontOfId:{
-    type:fileSchema,
-   },
-   backOfId:{
-    type:fileSchema,
-   },
+    frontOfId: {
+      type: fileSchema,
+    },
+    backOfId: {
+      type: fileSchema,
+    },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true
   }
 );
 
-// Populate car details when querying bookings
 bookingSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'car',
-    select: 'summary coverImage name model',
+    select: 'summary coverImage name model owner',
   });
   next();
 });

@@ -1,6 +1,6 @@
 import Booking from '../models/bookingModel.js';
 import Car from '../models/carModel.js';
-import { catchAsync } from '../utils/helpers.js';
+import { catchAsync} from '../utils/helpers.js';
 import AppError from '../utils/appError.js';
 
 export const createBooking = catchAsync(async (req, res, next) => {
@@ -25,11 +25,7 @@ export const createBooking = catchAsync(async (req, res, next) => {
 });
 
 export const getAllBookings = catchAsync(async (req, res, next) => {
-    const bookings = await Booking.find()
-        .populate({
-            path: 'car',
-            select: 'name model coverImage summary',
-        });
+    const bookings = await Booking.find();
 
     if (!bookings) {
         return next(new AppError("No Bookings found", 404))
