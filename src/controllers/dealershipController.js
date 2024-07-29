@@ -2,6 +2,7 @@ import * as service from "../services/dealershipService.js";
 import * as factory from "./handlerFactory.js";
 import { catchAsync } from "../utils/helpers.js";
 import { ROLES } from "../utils/constants.js";
+import Dealership from "../models/dealershipModel.js";
 
 const { ADMIN, DEALER, USER } = ROLES;
 
@@ -33,7 +34,7 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
 });
 
 export const getDealership = catchAsync(async(req,res,next)=>{
-  const {dealership} = await service.getDealership(req.params.id);
+  const {dealership} = await Dealership.findOne({owner:req.params.id}).select("+isApproved").exec()
   res.status(200).json({
     statusText: "success",
     data: {dealership}
