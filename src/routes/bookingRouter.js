@@ -1,8 +1,10 @@
 import express from 'express';
 import  bookingController from '../controllers/bookingController.js';
 import { protect, restrictTo } from '../middlewares/guard.js';
-import { ADMIN } from '../utils/constants.js';
+import { ROLES } from '../utils/constants.js';
 import { uploadFrontOfId } from '../middlewares/x.js';
+
+const {ADMIN} = ROLES;
 
 const router = express.Router();
 
