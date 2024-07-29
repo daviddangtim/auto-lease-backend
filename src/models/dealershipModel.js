@@ -4,7 +4,7 @@ import pointSchema from "./pointSchema.js";
 import { fileSchema } from "./fileSchema.js";
 import { limitArrayLength } from "../utils/helpers.js";
 
-export const dealershipSchema = new mongoose.Schema(
+const dealershipSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -23,7 +23,7 @@ export const dealershipSchema = new mongoose.Schema(
       select: false,
       required: [
         true,
-        "A dealership must have a valid valid Dealership Licence",
+        "A dealership must have a valid Dealership Licence",
       ],
     },
     summary: {
@@ -85,7 +85,7 @@ dealershipSchema.pre("save", function (next) {
   next();
 });
 
-dealershipSchema.pre(/^find/, async function (next) {
+dealershipSchema.pre(/^find/, function (next) {
   if (!this.options.bypass) {
     this.find({ isApproved: false });
   }
@@ -93,14 +93,10 @@ dealershipSchema.pre(/^find/, async function (next) {
   this.populate({
     path: "owner",
     select: "name photo _id",
-  });
-
-  this.populate({
+  }).populate({
     path: "cars",
     select: "name photos _id",
-  });
-
-  this.populate({
+  }).populate({
     path: "deliveryAgent",
     select: "name photo _id",
   });
