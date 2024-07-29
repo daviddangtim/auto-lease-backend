@@ -14,9 +14,6 @@ router
   .get(protect, restrictTo(ADMIN), bookingController.getAllBookings);
 router
   .route("/:id")
-  .post(protect, upload.fields(
-    [{ name: "frontOfId", maxCount: 1 },
-    { name: "backofId", maxCOunt: 1 }]
-  ), uploadFrontOfId, uploadFrontOfId, bookingController.createBooking);
+  .post(protect,  bookingController.createBooking);
 
 export default router;

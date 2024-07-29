@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema(
         message: "Invalid email address",
       },
     },
+    frontOfId: {
+      type: fileSchema,
+    },
+    backOfId: {
+      type: fileSchema,
+    },
     role: {
       type: String,
       default: USER,

@@ -4,7 +4,10 @@ import { protect } from "../middlewares/guard.js";
 
 const router = express.Router();
 
-router.post("/sign-up", authController.signUp);
+router.post("/sign-up", upload.fields(
+    [{ name: "frontOfId", maxCount: 1 },
+    { name: "backofId", maxCOunt: 1 }]
+  ), uploadFrontOfId, uploadFrontOfId,authController.signUp);
 router.post("/sign-in", authController.signIn);
 router.patch("/2fa", authController.signIn2fa);
 router.patch("/verify/:token", authController.verifyUser);

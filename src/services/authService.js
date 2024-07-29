@@ -24,6 +24,8 @@ export const signUp = async (req) => {
     "email",
     "password",
     "passwordConfirm",
+    "frontOfId",
+    "backOfId"
   ]);
 
   const user = await User.create(payload);

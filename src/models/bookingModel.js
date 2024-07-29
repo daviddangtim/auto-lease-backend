@@ -8,6 +8,10 @@ const bookingSchema = new mongoose.Schema(
       ref: 'Car',
       required: [true, 'Booking must be associated with a car'],
     },
+    pickupTime: {
+      type: DateAndTime,
+      required: [true, 'Pickup date is required'],
+    },
     pickupDate: {
       type: Date,
       required: [true, 'Pickup date is required'],
@@ -19,12 +23,6 @@ const bookingSchema = new mongoose.Schema(
     deliveryFee: {
       type: Number,
       default: 1000,
-    },
-    frontOfId: {
-      type: fileSchema,
-    },
-    backOfId: {
-      type: fileSchema,
     },
   },
   {
