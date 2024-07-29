@@ -37,7 +37,6 @@ router
     uploadMultiple,
     carController.createCarV1,
   )
-  .get(carController.getAllCars);
 router
   .route("/:id")
   .get(carController.getCar)

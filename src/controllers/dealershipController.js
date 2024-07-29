@@ -32,7 +32,13 @@ export const updateDealershipCerts = catchAsync(async (req, res) => {
   });
 });
 
-export const getDealership = factory.getById(service.getDealership);
+export const getDealership = catchAsync(async(req,res,next)=>{
+  const {dealership} = await service.getDealership(req.params.id);
+  res.status(200).json({
+    statusText: "success",
+    data: {dealership}
+  })
+});
 
 export const getAllDealershipsv1 = catchAsync(async (req, res, next) => {});
 

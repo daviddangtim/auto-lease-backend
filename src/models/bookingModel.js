@@ -9,7 +9,7 @@ const bookingSchema = new mongoose.Schema(
       required: [true, 'Booking must be associated with a car'],
     },
     pickupTime: {
-      type: DateAndTime,
+      type: Date,
       required: [true, 'Pickup date is required'],
     },
     pickupDate: {
