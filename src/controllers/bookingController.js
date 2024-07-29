@@ -1,7 +1,7 @@
-import Booking from '../models/bookingModel.js'; // Adjust the path as needed
-import Car from '../models/carModel.js'; // Adjust the path as needed
-import catchAsync from '../utils/catchAsync.js'; // Adjust the path as needed
-import AppError from '../utils/appError.js'; // Adjust the path as needed
+import Booking from '../models/bookingModel.js'; 
+import Car from '../models/carModel.js'; 
+import {catchAsync} from '../utils/helpers.js';
+import AppError from '../utils/appError.js'; 
 
 // Create a new booking
 export const createBooking = catchAsync(async (req, res, next) => {
