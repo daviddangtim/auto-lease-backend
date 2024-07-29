@@ -39,6 +39,41 @@ export const uploadDealershipLicense = catchAsync(async (req, res, next) => {
   next();
 });
 
+
+
+export const uploadBackOfId = catchAsync(async (req, res, next) => {
+  const backOfId = req?.files?.backOfId;
+
+  if (!backOfId) {
+    return next();
+  }
+
+  const result = await cloudinaryImageUploader(backOfId[0].buffer);
+
+  req.body.backOfId = {
+    url: result.secure_url,
+    id: result.public_id,
+  };
+
+  next();
+});
+
+export const uploadFrontOfId = catchAsync(async (req, res, next) => {
+  const frontOfId = req?.files?.frontOfId;
+
+  if (!frontOfId) {
+    return next();
+  }
+
+  const result = await cloudinaryImageUploader(frontOfId[0].buffer);
+
+  req.body.frontOfId = {
+    url: result.secure_url,
+    id: result.public_id,
+  };
+
+  next();
+});
 export const uploadCacCert = catchAsync(async (req, res, next) => {
   const cacCert = req?.files?.cacCertificate;
 
