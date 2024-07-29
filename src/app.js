@@ -34,7 +34,7 @@ app.use(morgan("dev"));
 app.use(ensureValidObject); // this prevents mongoose from breaking when it receives a string instead of an object
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/booking", bookingRouter);
+app.use("/api/v1/bookings", bookingRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/dealerships", dealershipRouter);
 app.use("/api/v1/cars", carRouter);
