@@ -35,7 +35,7 @@ export const createCarV1 = catchAsync(async (req, res, next) => {
 });
 
 export const setDealershipId = (req, res, next) => {
-  if (!req.body.dealership) req.body.dealership = req.params.id;
+  if (!req.body.dealership) req.body.dealership = req.user.id;
   next();
 };
 
