@@ -56,7 +56,6 @@ export const createCar = catchAsync(async (req, res, next) => {
   })
 });
 
-// export const createCar = factory.createOne(service.createCar);
 export const getCar = factory.getById(service.getCar);
 export const updateCar = factory.updateById(service.updateCar);
 export const deleteCar = factory.deleteById(service.deleteCar);
