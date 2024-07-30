@@ -30,14 +30,6 @@ router
   .delete(protect, restrictTo(ADMIN, DEALER), carController.deleteCar)
   .patch(protect, restrictTo(ADMIN, DEALER), carController.updateCar);
 router
-  .route("/")
-  .post(
-    protect,
-    upload.array("photos"),
-    uploadMultiple,
-    carController.createCarV1,
-  )
-router
   .route("/:id")
   .get(carController.getCar)
   .patch(upload.array("photos"), carController.updateCar);
