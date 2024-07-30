@@ -28,15 +28,6 @@ const carSchema = new mongoose.Schema(
       minlength: [3, "A car name must be at least 3 characters long"],
       maxlength: [50, "Name cannot be more than 50 characters"],
     },
-    // plateNumber: {
-    //   type: String,
-    //   trim: true,
-    //   required: [true, "Plate Number is required"],
-    //   match: [
-    //     /^[A-Z]{3}-?\d{3}[A-Z]{2}$/,
-    //     "Please enter a valid Nigerian plate number",
-    //   ],
-    // },
 
     category: {
       type: String,
@@ -84,26 +75,6 @@ const carSchema = new mongoose.Schema(
       type: Number,
       required: [true, "A car must have a price"],
       min: [0, "Price cannot be negative"],
-    },
-    // fee: {
-    //   type: Number,
-    //   required: [true, "A car must have a lease fee"],
-    //   validate: {
-    //     validator: function (value) {
-    //       const price =
-    //         this.price !== undefined ? this.price : this.get("price");
-    //       return price > value;
-    //     },
-    //     message: "Fee must be less than the price",
-    //   },
-    // },
-    discount: {
-      type: Number,
-      default: 0,
-      validate: {
-        validator: (v) => v >= 0 && v <= 100,
-        message: "Discount must be between 0% to 100%",
-      },
     },
     isAvailable: {
       type: Boolean,
