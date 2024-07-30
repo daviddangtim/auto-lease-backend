@@ -13,7 +13,7 @@ router
   .post(
     protect,
     restrictTo(DEALER, ADMIN),
-    carController.setDealershipId,
+    // carController.setDealershipId,
     upload.fields([
       { name: "coverImage", maxCount: 1 },
       { name: "photos", maxCount: 10 },
