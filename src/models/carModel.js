@@ -55,10 +55,6 @@ const carSchema = new mongoose.Schema(
       max: [5, "Ratings average cannot be more than 5"],
     },
     slug: String,
-    duration: {
-      type: Date,
-      required: [true, "A car must have a lease duration"],
-    },
     coverImage: {
       type: fileSchema,
       required: true,
