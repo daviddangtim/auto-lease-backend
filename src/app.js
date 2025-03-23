@@ -17,6 +17,8 @@ import dealershipRouter from "./routes/dealershipRouter.js";
 import carRouter from "./routes/carRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
+import paymentRouter from "./routes/paymentRouter.js";
+import orderRouter from "./routes/orderRouter.js";
 import { ensureValidObject } from "./middlewares/x.js";
 
 const app = express();
@@ -39,6 +41,8 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/dealerships", dealershipRouter);
 app.use("/api/v1/cars", carRouter);
 app.use("/api/v1/reviews", reviewRouter);
+app.use("/api/v1/payment", paymentRouter);
+app.use("/api/v1/orders", orderRouter);
 
 app.all("*", (req, res, next) => {
   return next(new AppError(`${req.originalUrl} is not on this server`, 404));
