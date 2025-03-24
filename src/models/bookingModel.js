@@ -22,7 +22,6 @@ const bookingSchema = new mongoose.Schema(
     },
     deliveryFee: {
       type: Number,
-      default: 1000,
     },
   },
   {

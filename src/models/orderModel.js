@@ -12,6 +12,22 @@ const orderSchema = new mongoose.Schema(
       ref: "Car",
       required: [true, "An order must have a car"],
     },
+    pickupTime:
+    {
+      type: Date,
+      required: [true, "An order must have a pickup time"],
+    },
+    pickupDate:
+    {
+      type: Date,
+      required: [true, "An order must have a pickup date"],
+    },
+    dropOffDate:
+    {
+      type: Date,
+      required: [true, "An order must have a drop-off date"],
+    },
+
     totalAmount: {
       type: Number,
       required: [true, "An order must have a total amount"],

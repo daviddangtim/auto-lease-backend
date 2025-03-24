@@ -8,6 +8,9 @@ export const createOrder = catchAsync(async (req, res, next) => {
   const order = await Order.create({
     user: payload.user,
     car: payload.car,
+    pickupTime: payload.pickupTime,
+    pickupDate: payload.pickupDate,
+    dropOffDate: payload.dropOffDate,
     totalAmount: payload.totalAmount,
     paymentReference: payload.paymentReference,
   });
